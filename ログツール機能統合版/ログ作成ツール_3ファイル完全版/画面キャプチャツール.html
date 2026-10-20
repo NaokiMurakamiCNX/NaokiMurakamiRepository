@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>画面キャプチャ＆編集ツール</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', 'Meiryo', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 { margin-bottom: 8px; font-size: 1.5rem; color: #e94560; }
+
+    /* ===== フロー ===== */
+    .flow {
+      margin: 8px 0 14px;
+      display: flex; gap: 6px; align-items: center;
+      justify-content: center; flex-wrap: wrap; font-size: 0.8rem; color: #aaa;
+    }
+    .flow span { background: #16213e; padding: 4px 10px; border-radius: 5px; }
+    .flow .arrow { background: none; color: #e94560; font-weight: bold; }
+    .flow .active { background: #e94560; color: #fff; }
+
+    /* ===== ボタン共通 ===== */
+    button {
+      padding: 8px 16px; border: none; border-radius: 6px;
+      font-size: 0.85rem; cursor: pointer; font-weight: bold;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    button:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .controls { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; justify-content: center; }
+    #btnCapture { background: #e94560; color: #fff; }
+    #btnReset   { background: #555; color: #fff; }
+
+    /* ===== ステータス ===== */
+    .status {
+      margin-bottom: 12px; padding: 8px 16px; background: #16213e;
+      border-radius: 6px; font-size: 0.88rem; min-height: 36px;
+      display: flex; align-items: center; text-align: center; transition: background 0.3s;
+    }
+    .status.success { background: #1b4332; }
+    .status.error   { background: #5a1a1a; }
+    .status.copying { background: #2d1b69; }
+
+    /* ===== トースト ===== */
+    @keyframes fadeInOut {
+      0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.8); }
+      15%  { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+      70%  { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%,-50%) scale(0.9); }
+    }
+    .copy-toast {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      background: rgba(27,67,50,0.92); color: #6effa0; font-size: 1.1rem;
+      font-weight: bold; padding: 14px 28px; border-radius: 12px;
+      pointer-events: none; z-index: 100; animation: fadeInOut 1.5s ease forwards;
+      white-space: nowrap;
+    }
+
+    /* ===== キャプチャキャンバス ===== */
+    .canvas-wrapper {
+      position: relative; border: 2px solid #333; border-radius: 8px;
+      overflow: hidden; background: #000; max-width: 95vw; cursor: crosshair;
+    }
+    .canvas-wrapper.no-capture { cursor: default; }
+    #mainCanvas { display: block; max-width: 100%; }
+
+    .selection-overlay {
+      position: absolute; border: 2px dashed #e94560;
+      background: rgba(233,69,96,0.15); pointer-events: none; display: none;
+    }
+    .size-label {
+      position: absolute; background: rgba(233,69,96,0.85); color: #fff;
+      font-size: 0.75rem; padding: 2px 6px; border-radius: 3px;
+      pointer-events: none; display: none; white-space: nowrap;
+    }
+
+    /* ============================== */
+    /*  エディタセクション              */
+    /* ============================== */
+    .editor-section {
+      margin-top: 28px; width: 100%; max-width: 1100px;
+      background: #16213e; border-radius: 12px; padding: 16px;
+      display: none;
+    }
+    .editor-section.active { display: block; }
+
+    .editor-title {
+      font-size: 1.1rem; color: #6c5ce7; margin-bottom: 12px;
+      text-align: center; font-weight: bold;
+    }
+
+    /* --- ツールバー --- */
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      justify-content: center; margin-bottom: 12px;
+      padding: 10px; background: #0f3460; border-radius: 8px;
+    }
+
+    .tool-group {
+      display: flex; gap: 4px; align-items: center;
+      padding: 0 8px; border-right: 1px solid #1a1a4e;
+    }
+    .tool-group:last-child { border-right: none; }
+    .tool-group label { font-size: 0.75rem; color: #aaa; margin-right: 4px; }
+
+    .tool-btn {
+      width: 36px; height: 36px; border-radius: 6px; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      background: #1a1a4e; color: #ccc; border: 2px solid transparent;
+      padding: 0; transition: all 0.15s;
+    }
+    .tool-btn:hover { background: #2d2d6e; color: #fff; transform: none; box-shadow: none; }
+    .tool-btn.active { border-color: #e94560; color: #fff; background: #3a1a4e; }
+    .tool-btn:disabled { opacity: 0.35; }
+
+    .color-input {
+      width: 36px; height: 36px; border: 2px solid #555; border-radius: 6px;
+      cursor: pointer; background: none; padding: 0;
+    }
+
+    .width-slider {
+      width: 70px; height: 6px; accent-color: #e94560; cursor: pointer;
+    }
+
+    .width-val {
+      font-size: 0.75rem; color: #aaa; min-width: 28px; text-align: center;
+    }
+
+    .font-size-input {
+      width: 48px; height: 28px; border-radius: 4px; border: 1px solid #555;
+      background: #1a1a4e; color: #eee; text-align: center; font-size: 0.8rem;
+    }
+
+    .fill-check {
+      accent-color: #e94560; width: 16px; height: 16px; cursor: pointer;
+    }
+
+    /* --- エディタキャンバス --- */
+    .editor-canvas-wrapper {
+      position: relative; display: flex; justify-content: center;
+      background: #0a0a1a; border-radius: 8px; overflow: hidden;
+      margin-bottom: 12px; min-height: 100px;
+    }
+
+    #editCanvas {
+      display: block; max-width: 100%; max-height: 70vh;
+      cursor: crosshair;
+    }
+
+    /* テキスト入力オーバーレイ */
+    .text-input-overlay {
+      position: absolute; display: none; z-index: 50;
+    }
+
+    .text-input-overlay textarea {
+      border: 2px dashed #e94560; background: rgba(0,0,0,0.6);
+      color: #fff; font-size: 16px; padding: 4px 6px;
+      border-radius: 4px; outline: none; resize: both;
+      min-width: 120px; min-height: 32px;
+      font-family: 'Meiryo', sans-serif;
+    }
+
+    .text-input-overlay .text-actions {
+      display: flex; gap: 4px; margin-top: 4px;
+    }
+
+    .text-input-overlay .text-actions button {
+      padding: 3px 10px; font-size: 0.75rem; border-radius: 4px;
+    }
+
+    /* --- アクションバー --- */
+    .action-bar {
+      display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    }
+
+    .btn-copy-edit { background: #6c5ce7; color: #fff; }
+    .btn-dl-edit   { background: #16c79a; color: #fff; }
+
+    .info {
+      margin-top: 14px; font-size: 0.78rem; color: #888;
+      text-align: center; line-height: 1.7;
+    }
+
+    #hiddenVideo { display: none; }
+
+    /* レスポンシブ */
+    @media (max-width: 600px) {
+      .tool-group { border-right: none; padding: 4px; }
+      .toolbar { gap: 4px; padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📸 画面キャプチャ＆編集ツール</h1>
+
+  <div class="flow" id="flowIndicator">
+    <span id="flow1" class="active">① キャプチャ</span>
+    <span class="arrow">→</span>
+    <span id="flow2">② 領域選択</span>
+    <span class="arrow">→</span>
+    <span id="flow3">③ 自動コピー</span>
+    <span class="arrow">→</span>
+    <span id="flow4">④ 編集</span>
+  </div>
+
+  <div class="controls">
+    <button id="btnCapture">🖥️ 画面をキャプチャ</button>
+    <button id="btnReset" disabled>🔄 リセット</button>
+  </div>
+
+  <div class="status" id="status">「画面をキャプチャ」ボタンを押して開始してください。</div>
+
+  <!-- ===== キャプチャキャンバス ===== -->
+  <div class="canvas-wrapper no-capture" id="canvasWrapper">
+    <canvas id="mainCanvas" width="800" height="450"></canvas>
+    <div class="selection-overlay" id="selectionOverlay"></div>
+    <div class="size-label" id="sizeLabel"></div>
+  </div>
+
+  <!-- ===== エディタセクション ===== -->
+  <div class="editor-section" id="editorSection">
+    <div class="editor-title">🎨 画像編集</div>
+
+    <!-- ツールバー -->
+    <div class="toolbar" id="toolbar">
+      <!-- 描画ツール -->
+      <div class="tool-group">
+        <button class="tool-btn active" data-tool="pen" title="ペン">✏️</button>
+        <button class="tool-btn" data-tool="highlighter" title="蛍光ペン">🖍️</button>
+        <button class="tool-btn" data-tool="line" title="直線">╱</button>
+        <button class="tool-btn" data-tool="arrow" title="矢印">➜</button>
+        <button class="tool-btn" data-tool="rect" title="四角">▭</button>
+        <button class="tool-btn" data-tool="ellipse" title="楕円">◯</button>
+        <button class="tool-btn" data-tool="text" title="テキスト">T</button>
+        <button class="tool-btn" data-tool="eraser" title="消しゴム">🧹</button>
+      </div>
+
+      <!-- 色 -->
+      <div class="tool-group">
+        <label>色</label>
+        <input type="color" id="colorPicker" class="color-input" value="#ff0000">
+      </div>
+
+      <!-- 線幅 -->
+      <div class="tool-group">
+        <label>太さ</label>
+        <input type="range" id="widthSlider" class="width-slider" min="1" max="20" value="3">
+        <span class="width-val" id="widthVal">3</span>
+      </div>
+
+      <!-- フォントサイズ -->
+      <div class="tool-group" id="fontGroup">
+        <label>文字</label>
+        <input type="number" id="fontSizeInput" class="font-size-input" value="24" min="8" max="120">
+      </div>
+
+      <!-- 塗りつぶし -->
+      <div class="tool-group" id="fillGroup">
+        <label>塗り</label>
+        <input type="checkbox" id="fillCheck" class="fill-check">
+      </div>
+
+      <!-- 操作 -->
+      <div class="tool-group">
+        <button class="tool-btn" id="btnUndo" title="元に戻す" disabled>↩️</button>
+        <button class="tool-btn" id="btnRedo" title="やり直し" disabled>↪️</button>
+        <button class="tool-btn" id="btnClearDraw" title="編集をクリア">🗑️</button>
+      </div>
+    </div>
+
+    <!-- エディタキャンバス -->
+    <div class="editor-canvas-wrapper" id="editWrapper">
+      <canvas id="editCanvas"></canvas>
+      <div class="text-input-overlay" id="textOverlay">
+        <textarea id="textInput" rows="2" placeholder="テキストを入力…"></textarea>
+        <div class="text-actions">
+          <button id="btnTextOk" style="background:#16c79a;color:#fff;">確定</button>
+          <button id="btnTextCancel" style="background:#e94560;color:#fff;">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- アクションボタン -->
+    <div class="action-bar">
+      <button class="btn-copy-edit" id="btnCopyEdit">📋 編集画像をクリップボードにコピー</button>
+      <button class="btn-dl-edit" id="btnDlEdit">💾 編集画像をPNGダウンロード</button>
+    </div>
+  </div>
+
+  <p class="info">
+    ※ HTTPS / localhost 環境で動作 ｜
+    領域ドラッグで自動コピー → そのまま編集 → 再コピー or ダウンロード<br>
+    Ctrl+V（⌘+V）で貼り付け ｜ Ctrl+Z で元に戻す
+  </p>
+
+  <video id="hiddenVideo"></video>
+
+  <script>
+  (() => {
+    // ========================================
+    // 要素取得
+    // ========================================
+    const $ = id => document.getElementById(id);
+    const btnCapture   = $('btnCapture');
+    const btnReset     = $('btnReset');
+    const statusEl     = $('status');
+    const mainCanvas   = $('mainCanvas');
+    const mainCtx      = mainCanvas.getContext('2d');
+    const wrapper      = $('canvasWrapper');
+    const overlay      = $('selectionOverlay');
+    const sizeLabel    = $('sizeLabel');
+    const video        = $('hiddenVideo');
+    const flows        = [$('flow1'), $('flow2'), $('flow3'), $('flow4')];
+
+    // エディタ
+    const editorSection = $('editorSection');
+    const editCanvas    = $('editCanvas');
+    const editCtx       = editCanvas.getContext('2d');
+    const editWrapper   = $('editWrapper');
+    const textOverlay   = $('textOverlay');
+    const textInput     = $('textInput');
+    const colorPicker   = $('colorPicker');
+    const widthSlider   = $('widthSlider');
+    const widthVal      = $('widthVal');
+    const fontSizeInput = $('fontSizeInput');
+    const fillCheck     = $('fillCheck');
+    const btnUndo       = $('btnUndo');
+    const btnRedo       = $('btnRedo');
+    const btnClearDraw  = $('btnClearDraw');
+    const btnCopyEdit   = $('btnCopyEdit');
+    const btnDlEdit     = $('btnDlEdit');
+    const btnTextOk     = $('btnTextOk');
+    const btnTextCancel = $('btnTextCancel');
+
+    // ========================================
+    // キャプチャ関連の状態
+    // ========================================
+    let capDragging = false, capStartX = 0, capStartY = 0;
+    let selRect = { x:0, y:0, w:0, h:0 };
+    let capScaleX = 1, capScaleY = 1;
+    let captured = false, copyCount = 0;
+
+    // 一時キャンバス（切り出し用）
+    const cropCanvas = document.createElement('canvas');
+    const cropCtx    = cropCanvas.getContext('2d');
+
+    // ========================================
+    // エディタ関連の状態
+    // ========================================
+    let currentTool  = 'pen';
+    let editorActive = false;
+    let drawing      = false;
+    let drawStartX   = 0, drawStartY = 0;
+    let editScaleX   = 1, editScaleY = 1;
+
+    // 元画像保持
+    let baseImageData = null;
+
+    // 履歴
+    let history = [];
+    let historyIdx = -1;
+    const MAX_HIST = 40;
+
+    // プレビュー用保存
+    let preDrawData = null;
+
+    // テキスト入力位置
+    let textPosX = 0, textPosY = 0;
+
+    // ========================================
+    // ユーティリティ
+    // ========================================
+    function setStatus(msg, type = '') {
+      statusEl.textContent = msg;
+      statusEl.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    function setFlow(step) {
+      flows.forEach((el, i) => el.classList.toggle('active', i === step - 1));
+    }
+
+    function showToast(el, msg) {
+      const old = el.querySelector('.copy-toast');
+      if (old) old.remove();
+      const t = document.createElement('div');
+      t.className = 'copy-toast';
+      t.textContent = msg;
+      el.appendChild(t);
+      t.addEventListener('animationend', () => t.remove());
+    }
+
+    function timestamp() {
+      const n = new Date();
+      return [n.getFullYear(), n.getMonth()+1, n.getDate()].map(v=>String(v).padStart(2,'0')).join('')
+        + '_' + [n.getHours(), n.getMinutes(), n.getSeconds()].map(v=>String(v).padStart(2,'0')).join('');
+    }
+
+    async function copyCanvasToClipboard(canvas, toastEl, label) {
+      try {
+        const blob = await new Promise((res, rej) =>
+          canvas.toBlob(b => b ? res(b) : rej(new Error('Blob変換失敗')), 'image/png'));
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        showToast(toastEl, `✅ ${label}`);
+        return true;
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+    }
+
+    function downloadCanvas(canvas) {
+      const a = document.createElement('a');
+      a.download = `capture_${timestamp()}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    }
+
+    // ========================================
+    // キャプチャ
+    // ========================================
+    function updateCapScale() {
+      capScaleX = mainCanvas.width  / mainCanvas.clientWidth;
+      capScaleY = mainCanvas.height / mainCanvas.clientHeight;
+    }
+
+    function drawPlaceholder() {
+      mainCanvas.width = 800; mainCanvas.height = 450;
+      mainCtx.fillStyle = '#16213e';
+      mainCtx.fillRect(0, 0, 800, 450);
+      mainCtx.fillStyle = '#555';
+      mainCtx.font = '20px Meiryo, sans-serif';
+      mainCtx.textAlign = 'center';
+      mainCtx.fillText('ここにキャプチャ画像が表示されます', 400, 225);
+    }
+
+    btnCapture.addEventListener('click', async () => {
+      try {
+        setStatus('画面共有ダイアログを確認してください…');
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video:{ cursor:'always' }, audio:false });
+        video.srcObject = stream;
+        await video.play();
+        await new Promise(r => setTimeout(r, 300));
+        mainCanvas.width  = video.videoWidth;
+        mainCanvas.height = video.videoHeight;
+        mainCtx.drawImage(video, 0, 0);
+        stream.getTracks().forEach(t => t.stop());
+        video.srcObject = null;
+        updateCapScale();
+        captured = true;
+        wrapper.classList.remove('no-capture');
+        btnReset.disabled = false;
+        overlay.style.display = sizeLabel.style.display = 'none';
+        editorSection.classList.remove('active');
+        editorActive = false;
+        copyCount = 0;
+        setFlow(2);
+        setStatus('キャプチャ完了！ 領域をドラッグで選択 → 自動コピー＆編集モードへ', 'success');
+      } catch (e) {
+        console.error(e);
+        setStatus('キャプチャがキャンセルされました。', 'error');
+      }
+    });
+
+    // ===== 領域選択 =====
+    function getCapPos(e) {
+      const r = mainCanvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: Math.max(0, Math.min(cx-r.left, r.width)), y: Math.max(0, Math.min(cy-r.top, r.height)) };
+    }
+
+    function onCapDown(e) {
+      if (!captured) return;
+      e.preventDefault();
+      capDragging = true;
+      const p = getCapPos(e);
+      capStartX = p.x; capStartY = p.y;
+      overlay.style.display = sizeLabel.style.display = 'block';
+      overlay.style.left = capStartX+'px'; overlay.style.top = capStartY+'px';
+      overlay.style.width = overlay.style.height = '0px';
+    }
+
+    function onCapMove(e) {
+      if (!capDragging) return;
+      e.preventDefault();
+      const p = getCapPos(e);
+      const x = Math.min(capStartX, p.x), y = Math.min(capStartY, p.y);
+      const w = Math.abs(p.x - capStartX), h = Math.abs(p.y - capStartY);
+      overlay.style.left = x+'px'; overlay.style.top = y+'px';
+      overlay.style.width = w+'px'; overlay.style.height = h+'px';
+      selRect = { x, y, w, h };
+      const rw = Math.round(w*capScaleX), rh = Math.round(h*capScaleY);
+      sizeLabel.textContent = `${rw} × ${rh}`;
+      sizeLabel.style.left = (x+w+6)+'px'; sizeLabel.style.top = (y-2)+'px';
+      setStatus(`選択中: ${rw} × ${rh} px`);
+    }
+
+    async function onCapUp(e) {
+      if (!capDragging) return;
+      capDragging = false;
+      if (selRect.w < 5 || selRect.h < 5) {
+        overlay.style.display = sizeLabel.style.display = 'none';
+        setStatus('領域が小さすぎます。再度ドラッグしてください。', 'error');
+        return;
+      }
+      updateCapScale();
+      const sx = Math.round(selRect.x * capScaleX);
+      const sy = Math.round(selRect.y * capScaleY);
+      const sw = Math.round(selRect.w * capScaleX);
+      const sh = Math.round(selRect.h * capScaleY);
+      cropCanvas.width = sw; cropCanvas.height = sh;
+      cropCtx.drawImage(mainCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
+
+      // 自動コピー
+      setStatus('📋 クリップボードにコピー中…', 'copying');
+      setFlow(3);
+      copyCount++;
+      const ok = await copyCanvasToClipboard(cropCanvas, wrapper, `コピー完了（${copyCount}回目）`);
+      if (ok) {
+        setStatus(`✅ ${sw}×${sh}px をコピーしました（${copyCount}回目）─ 下の編集エリアで加工できます`, 'success');
+      } else {
+        setStatus('⚠️ 自動コピーに失敗。編集後にコピーボタンをお使いください。', 'error');
+      }
+
+      setTimeout(() => { overlay.style.display = sizeLabel.style.display = 'none'; }, 800);
+
+      // エディタ初期化
+      initEditor(cropCanvas);
+    }
+
+    wrapper.addEventListener('mousedown', onCapDown);
+    wrapper.addEventListener('mousemove', onCapMove);
+    wrapper.addEventListener('mouseup',   onCapUp);
+    wrapper.addEventListener('touchstart', onCapDown, { passive:false });
+    wrapper.addEventListener('touchmove',  onCapMove, { passive:false });
+    wrapper.addEventListener('touchend',   onCapUp);
+    window.addEventListener('resize', () => { if (captured) updateCapScale(); if (editorActive) updateEditScale(); });
+
+    // ===== リセット =====
+    btnReset.addEventListener('click', () => {
+      drawPlaceholder();
+      overlay.style.display = sizeLabel.style.display = 'none';
+      editorSection.classList.remove('active');
+      editorActive = false; captured = false; copyCount = 0;
+      btnReset.disabled = true;
+      wrapper.classList.add('no-capture');
+      setFlow(1);
+      setStatus('リセットしました。「画面をキャプチャ」で再開できます。');
+    });
+
+    drawPlaceholder();
+
+    // ========================================
+    // ===== エディタ =====
+    // ========================================
+
+    function initEditor(srcCanvas) {
+      editCanvas.width  = srcCanvas.width;
+      editCanvas.height = srcCanvas.height;
+      editCtx.drawImage(srcCanvas, 0, 0);
+      baseImageData = editCtx.getImageData(0, 0, editCanvas.width, editCanvas.height);
+      history = []; historyIdx = -1;
+      saveHist();
+      editorSection.classList.add('active');
+      editorActive = true;
+      updateEditScale();
+      updateHistButtons();
+      hideTextOverlay();
+      setFlow(4);
+      editorSection.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function updateEditScale() {
+      if (!editCanvas.clientWidth) return;
+      editScaleX = editCanvas.width  / editCanvas.clientWidth;
+      editScaleY = editCanvas.height / editCanvas.clientHeight;
+    }
+
+    // --- 履歴 ---
+    function saveHist() {
+      history = history.slice(0, historyIdx + 1);
+      history.push(editCtx.getImageData(0, 0, editCanvas.width, editCanvas.height));
+      if (history.length > MAX_HIST) history.shift();
+      historyIdx = history.length - 1;
+      updateHistButtons();
+    }
+
+    function undo() {
+      if (historyIdx > 0) { historyIdx--; editCtx.putImageData(history[historyIdx], 0, 0); updateHistButtons(); }
+    }
+
+    function redo() {
+      if (historyIdx < history.length - 1) { historyIdx++; editCtx.putImageData(history[historyIdx], 0, 0); updateHistButtons(); }
+    }
+
+    function updateHistButtons() {
+      btnUndo.disabled = historyIdx <= 0;
+      btnRedo.disabled = historyIdx >= history.length - 1;
+    }
+
+    btnUndo.addEventListener('click', undo);
+    btnRedo.addEventListener('click', redo);
+
+    btnClearDraw.addEventListener('click', () => {
+      if (!baseImageData) return;
+      editCtx.putImageData(baseImageData, 0, 0);
+      saveHist();
+      setStatus('編集をクリアしました。元の切り出し画像に戻しました。', 'success');
+    });
+
+    // Ctrl+Z / Ctrl+Y
+    document.addEventListener('keydown', e => {
+      if (!editorActive) return;
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redo(); }
+    });
+
+    // --- ツール選択 ---
+    document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTool = btn.dataset.tool;
+        hideTextOverlay();
+        editCanvas.style.cursor = currentTool === 'text' ? 'text' : 'crosshair';
+      });
+    });
+
+    colorPicker.addEventListener('input', () => {});
+    widthSlider.addEventListener('input', () => { widthVal.textContent = widthSlider.value; });
+
+    // --- 描画座標 ---
+    function getEditPos(e) {
+      const r = editCanvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: (cx - r.left) * editScaleX, y: (cy - r.top) * editScaleY };
+    }
+
+    // 表示座標（テキストオーバーレイ用）
+    function getEditDisplayPos(e) {
+      const r = editCanvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: cx - r.left, y: cy - r.top };
+    }
+
+    // --- 描画ロジック ---
+    const SHAPE_TOOLS = ['line','arrow','rect','ellipse'];
+    const FREEHAND_TOOLS = ['pen','highlighter','eraser'];
+
+    function setupStroke() {
+      const w = parseInt(widthSlider.value);
+      editCtx.lineCap = 'round';
+      editCtx.lineJoin = 'round';
+      editCtx.globalAlpha = 1;
+
+      if (currentTool === 'highlighter') {
+        editCtx.strokeStyle = colorPicker.value;
+        editCtx.lineWidth = w * 4;
+        editCtx.globalAlpha = 0.35;
+        editCtx.globalCompositeOperation = 'source-over';
+      } else if (currentTool === 'eraser') {
+        editCtx.strokeStyle = '#ffffff';
+        editCtx.lineWidth = w * 3;
+        editCtx.globalCompositeOperation = 'source-over';
+      } else {
+        editCtx.strokeStyle = colorPicker.value;
+        editCtx.fillStyle = colorPicker.value;
+        editCtx.lineWidth = w;
+        editCtx.globalCompositeOperation = 'source-over';
+      }
+    }
+
+    function resetCtxState() {
+      editCtx.globalAlpha = 1;
+      editCtx.globalCompositeOperation = 'source-over';
+    }
+
+    function drawShapeBetween(x1, y1, x2, y2) {
+      setupStroke();
+      switch (currentTool) {
+        case 'line':
+          editCtx.beginPath(); editCtx.moveTo(x1,y1); editCtx.lineTo(x2,y2); editCtx.stroke();
+          break;
+        case 'arrow':
+          drawArrow(x1,y1,x2,y2);
+          break;
+        case 'rect':
+          if (fillCheck.checked) { editCtx.fillRect(x1,y1,x2-x1,y2-y1); }
+          else { editCtx.strokeRect(x1,y1,x2-x1,y2-y1); }
+          break;
+        case 'ellipse':
+          const cx=(x1+x2)/2, cy=(y1+y2)/2, rx=Math.abs(x2-x1)/2, ry=Math.abs(y2-y1)/2;
+          editCtx.beginPath(); editCtx.ellipse(cx,cy,Math.max(rx,1),Math.max(ry,1),0,0,Math.PI*2);
+          fillCheck.checked ? editCtx.fill() : editCtx.stroke();
+          break;
+      }
+      resetCtxState();
+    }
+
+    function drawArrow(x1,y1,x2,y2) {
+      const w = parseInt(widthSlider.value);
+      const headLen = Math.max(w*4, 16);
+      const angle = Math.atan2(y2-y1, x2-x1);
+      editCtx.beginPath(); editCtx.moveTo(x1,y1); editCtx.lineTo(x2,y2); editCtx.stroke();
+      editCtx.beginPath(); editCtx.moveTo(x2,y2);
+      editCtx.lineTo(x2-headLen*Math.cos(angle-Math.PI/6), y2-headLen*Math.sin(angle-Math.PI/6));
+      editCtx.lineTo(x2-headLen*Math.cos(angle+Math.PI/6), y2-headLen*Math.sin(angle+Math.PI/6));
+      editCtx.closePath(); editCtx.fill();
+    }
+
+    // --- テキスト ---
+    function showTextOverlay(dispX, dispY, canvasX, canvasY) {
+      textOverlay.style.display = 'block';
+      textOverlay.style.left = dispX + 'px';
+      textOverlay.style.top  = dispY + 'px';
+      textInput.style.color = colorPicker.value;
+      textInput.style.fontSize = fontSizeInput.value / editScaleX + 'px';
+      textInput.value = '';
+      textPosX = canvasX; textPosY = canvasY;
+      setTimeout(() => textInput.focus(), 50);
+    }
+
+    function hideTextOverlay() {
+      textOverlay.style.display = 'none';
+      textInput.value = '';
+    }
+
+    function commitText() {
+      const txt = textInput.value.trim();
+      if (!txt) { hideTextOverlay(); return; }
+      const size = parseInt(fontSizeInput.value) || 24;
+      editCtx.globalAlpha = 1;
+      editCtx.globalCompositeOperation = 'source-over';
+      editCtx.fillStyle = colorPicker.value;
+      editCtx.font = `bold ${size}px "Meiryo", "Segoe UI", sans-serif`;
+      editCtx.textBaseline = 'top';
+
+      const lines = txt.split('\n');
+      lines.forEach((line, i) => {
+        editCtx.fillText(line, textPosX, textPosY + i * size * 1.2);
+      });
+
+      saveHist();
+      hideTextOverlay();
+      setStatus('テキストを描画しました。', 'success');
+    }
+
+    btnTextOk.addEventListener('click', commitText);
+    btnTextCancel.addEventListener('click', hideTextOverlay);
+    textInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commitText(); }
+      if (e.key === 'Escape') hideTextOverlay();
+    });
+
+    // --- エディタ イベント ---
+    function onEditDown(e) {
+      if (!editorActive) return;
+      e.preventDefault();
+      updateEditScale();
+
+      if (currentTool === 'text') {
+        const dp = getEditDisplayPos(e);
+        const cp = getEditPos(e);
+        showTextOverlay(dp.x, dp.y, cp.x, cp.y);
+        return;
+      }
+
+      drawing = true;
+      const p = getEditPos(e);
+      drawStartX = p.x; drawStartY = p.y;
+
+      if (SHAPE_TOOLS.includes(currentTool)) {
+        preDrawData = editCtx.getImageData(0, 0, editCanvas.width, editCanvas.height);
+      }
+
+      if (FREEHAND_TOOLS.includes(currentTool)) {
+        setupStroke();
+        editCtx.beginPath();
+        editCtx.moveTo(p.x, p.y);
+      }
+    }
+
+    function onEditMove(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      const p = getEditPos(e);
+
+      if (FREEHAND_TOOLS.includes(currentTool)) {
+        editCtx.lineTo(p.x, p.y);
+        editCtx.stroke();
+        editCtx.beginPath();
+        editCtx.moveTo(p.x, p.y);
+      }
+
+      if (SHAPE_TOOLS.includes(currentTool) && preDrawData) {
+        editCtx.putImageData(preDrawData, 0, 0);
+        drawShapeBetween(drawStartX, drawStartY, p.x, p.y);
+      }
+    }
+
+    function onEditUp(e) {
+      if (!drawing) return;
+      drawing = false;
+
+      if (FREEHAND_TOOLS.includes(currentTool)) {
+        resetCtxState();
+        saveHist();
+      }
+
+      if (SHAPE_TOOLS.includes(currentTool)) {
+        const p = getEditPos(e.changedTouches ? e.changedTouches[0] || e : e);
+        if (preDrawData) editCtx.putImageData(preDrawData, 0, 0);
+        drawShapeBetween(drawStartX, drawStartY, p.x, p.y);
+        resetCtxState();
+        preDrawData = null;
+        saveHist();
+      }
+    }
+
+    editCanvas.addEventListener('mousedown',  onEditDown);
+    editCanvas.addEventListener('mousemove',  onEditMove);
+    editCanvas.addEventListener('mouseup',    onEditUp);
+    editCanvas.addEventListener('mouseleave', onEditUp);
+    editCanvas.addEventListener('touchstart', onEditDown, { passive:false });
+    editCanvas.addEventListener('touchmove',  onEditMove, { passive:false });
+    editCanvas.addEventListener('touchend',   e => {
+      // touchend doesn't have touches, use changedTouches
+      if (!drawing) return;
+      drawing = false;
+      if (FREEHAND_TOOLS.includes(currentTool)) { resetCtxState(); saveHist(); }
+      if (SHAPE_TOOLS.includes(currentTool)) {
+        if (preDrawData) editCtx.putImageData(preDrawData, 0, 0);
+        const touch = e.changedTouches[0];
+        const r = editCanvas.getBoundingClientRect();
+        const px = (touch.clientX - r.left) * editScaleX;
+        const py = (touch.clientY - r.top)  * editScaleY;
+        drawShapeBetween(drawStartX, drawStartY, px, py);
+        resetCtxState(); preDrawData = null; saveHist();
+      }
+    });
+
+    // --- コピー & ダウンロード ---
+    btnCopyEdit.addEventListener('click', async () => {
+      setStatus('📋 編集画像をコピー中…', 'copying');
+      const ok = await copyCanvasToClipboard(editCanvas, editWrapper, '✅ コピー完了！');
+      if (ok) setStatus('✅ 編集画像をクリップボードにコピーしました！', 'success');
+      else    setStatus('⚠️ コピーに失敗しました。PNGダウンロードをお試しください。', 'error');
+    });
+
+    btnDlEdit.addEventListener('click', () => {
+      downloadCanvas(editCanvas);
+      setStatus('💾 編集画像をダウンロードしました。', 'success');
+    });
+
+  })();
+  </script>
+</body>
+</html>

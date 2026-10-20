@@ -1,0 +1,1017 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>定型文登録ツール Ver2</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card-bg: #ffffff;
+    --text: #23272f;
+    --sub-text: #6b7280;
+    --border: #e0e3ea;
+    --primary: #4f8cff;
+    --primary-hover: #3a6fd8;
+    --danger: #e74c3c;
+    --danger-hover: #c0392b;
+    --success: #27ae60;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    --radius: 12px;
+    --header-bg: linear-gradient(90deg, #4f8cff 0%, #6c5ce7 100%);
+    --input-bg: #f8f9fb;
+    --badge-bg: #e8f0fe;
+    --badge-text: #4f8cff;
+    --modal-overlay: rgba(0,0,0,0.35);
+    --combo-bg: #f0f4ff;
+    --filter-active-bg: #4f8cff;
+    --filter-active-text: #ffffff;
+  }
+  [data-theme="dark"] {
+    --bg: #181a20;
+    --card-bg: #23272f;
+    --text: #e4e6ed;
+    --sub-text: #9ca3af;
+    --border: #333842;
+    --primary: #4f8cff;
+    --primary-hover: #6c9fff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.3);
+    --input-bg: #1a1d24;
+    --badge-bg: #28304a;
+    --badge-text: #6c9fff;
+    --modal-overlay: rgba(0,0,0,0.6);
+    --combo-bg: #1e2330;
+    --filter-active-bg: #4f8cff;
+    --filter-active-text: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+  header {
+    background: var(--header-bg);
+    color: #fff;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(79,140,255,0.15);
+  }
+  header h1 { font-size: 1.35rem; display: flex; align-items: center; gap: 8px; }
+  .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .header-actions button {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .header-actions button:hover { background: rgba(255,255,255,0.32); }
+  .theme-toggle {
+    background: none; border: none; font-size: 1.5rem; cursor: pointer;
+    color: #fff; margin-left: 8px; transition: transform 0.3s;
+  }
+  .theme-toggle:hover { transform: rotate(20deg); }
+
+  .main-container {
+    display: flex; gap: 0; padding: 24px; max-width: 1600px;
+    margin: 0 auto; align-items: flex-start; position: relative;
+  }
+  .left-column {
+    min-width: 320px; width: 420px; display: flex;
+    flex-direction: column; gap: 20px; flex-shrink: 0; position: relative;
+  }
+  .resize-handle {
+    width: 6px; cursor: col-resize; background: var(--border);
+    border-radius: 3px; flex-shrink: 0; margin: 0 4px;
+    min-height: 200px; transition: background 0.2s; align-self: stretch;
+  }
+  .resize-handle:hover, .resize-handle.active { background: var(--primary); }
+  .right-column { flex: 1; min-width: 340px; }
+
+  .card {
+    background: var(--card-bg); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 22px;
+    border: 1px solid var(--border); transition: background 0.3s, border 0.3s;
+  }
+  .card h2 {
+    font-size: 1.1rem; margin-bottom: 16px; display: flex;
+    align-items: center; gap: 8px; color: var(--primary);
+  }
+  label { font-size: 0.92rem; color: var(--sub-text); margin-bottom: 4px; display: block; }
+  input[type="text"], textarea, select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 1rem; background: var(--input-bg);
+    color: var(--text); margin-bottom: 12px; transition: border 0.2s, background 0.2s;
+    font-family: inherit;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary); }
+  textarea { min-height: 90px; resize: vertical; }
+  .btn {
+    padding: 10px 22px; border: none; border-radius: 8px; font-size: 1rem;
+    cursor: pointer; transition: background 0.2s, transform 0.1s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: var(--danger-hover); }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: #219a52; }
+  .btn-outline { background: transparent; color: var(--sub-text); border: 1px solid var(--border); }
+  .btn-outline:hover { background: var(--input-bg); }
+  .btn-sm { padding: 6px 14px; font-size: 0.9rem; }
+
+  .list-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .list-header .badge {
+    background: var(--badge-bg); color: var(--badge-text);
+    border-radius: 20px; padding: 3px 14px; font-size: 0.92rem; font-weight: 600;
+  }
+  .search-box {
+    display: flex; align-items: center; gap: 6px; background: var(--input-bg);
+    border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px;
+    flex: 1; min-width: 140px;
+  }
+  .search-box input {
+    border: none; background: transparent; outline: none;
+    font-size: 0.95rem; color: var(--text); width: 100%; margin-bottom: 0; padding: 0;
+  }
+
+  .filter-tags-row {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .filter-tags-row .filter-label {
+    font-size: 0.88rem; color: var(--sub-text); margin-right: 2px; white-space: nowrap;
+  }
+  .filter-tag {
+    display: inline-flex; align-items: center; gap: 5px; padding: 5px 14px;
+    border-radius: 20px; border: 1.5px solid var(--border); background: var(--input-bg);
+    color: var(--sub-text); font-size: 0.9rem; cursor: pointer;
+    transition: all 0.2s; user-select: none; white-space: nowrap;
+  }
+  .filter-tag:hover { border-color: var(--primary); color: var(--primary); background: var(--badge-bg); }
+  .filter-tag.active {
+    background: var(--filter-active-bg); color: var(--filter-active-text);
+    border-color: var(--filter-active-bg); font-weight: 600;
+  }
+  .filter-tag .cat-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .filter-tag.active .cat-dot { border: 1.5px solid rgba(255,255,255,0.6); }
+
+  .expand-btns { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .expand-btns button {
+    background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 5px 14px; font-size: 0.88rem; color: var(--sub-text); cursor: pointer;
+    transition: background 0.2s;
+  }
+  .expand-btns button:hover { background: var(--badge-bg); color: var(--primary); }
+
+  .template-group { margin-bottom: 10px; }
+  .template-group-header {
+    display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 7px 10px;
+    background: var(--input-bg); border-radius: 8px; font-weight: 600;
+    font-size: 0.95rem; transition: background 0.2s; user-select: none;
+  }
+  .template-group-header:hover { background: var(--badge-bg); }
+  .template-group-header .cat-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .template-group-header .arrow { transition: transform 0.2s; font-size: 0.8em; }
+  .template-group-header .arrow.open { transform: rotate(90deg); }
+  .template-group-items { padding-left: 0; }
+
+  /* ★ Template Item */
+  .template-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+    border-bottom: 1px solid var(--border); transition: background 0.15s;
+    position: relative; min-height: 40px;
+  }
+  .template-item:hover { background: var(--input-bg); }
+  .template-item:last-child { border-bottom: none; }
+  .template-item.expanded { align-items: flex-start; }
+  .template-item.drag-over-item { border-top: 2.5px solid var(--primary); }
+
+  .tpl-drag-handle {
+    cursor: grab; color: var(--sub-text); font-size: 1.05rem;
+    flex-shrink: 0; user-select: none; padding: 0 2px;
+    transition: color 0.2s;
+  }
+  .tpl-drag-handle:hover { color: var(--primary); }
+  .tpl-drag-handle:active { cursor: grabbing; }
+
+  .template-item-info { flex: 1; min-width: 0; overflow: hidden; }
+  .template-item-info .tpl-name {
+    font-weight: 600; font-size: 0.96rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .template-item-info .tpl-body {
+    font-size: 0.9rem; color: var(--sub-text); white-space: pre-wrap;
+    word-break: break-all; margin-top: 6px; padding: 8px 10px;
+    background: var(--input-bg); border-radius: 6px; border: 1px solid var(--border);
+    line-height: 1.55; display: none;
+  }
+  .template-item-info .tpl-body.open { display: block; }
+
+  .template-item .tpl-actions { display: flex; gap: 5px; flex-shrink: 0; align-items: center; }
+  .template-item .tpl-actions button {
+    background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 10px; font-size: 0.85rem; cursor: pointer; color: var(--sub-text);
+    transition: background 0.2s, color 0.2s; white-space: nowrap;
+  }
+  .template-item .tpl-actions button:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .template-item .tpl-actions button.del-btn:hover { background: var(--danger); border-color: var(--danger); }
+  .template-item .tpl-actions button.expand-btn { font-size: 0.8rem; min-width: 32px; text-align: center; }
+  .template-item .tpl-actions button.expand-btn:hover { background: var(--badge-bg); color: var(--primary); border-color: var(--primary); }
+
+  .combo-check {
+    width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0;
+  }
+
+  /* Combo */
+  .combo-card { background: var(--combo-bg); border: 1.5px dashed var(--primary); }
+  .combo-card h2 { color: var(--primary); }
+  .combo-selected-list { min-height: 40px; margin-bottom: 12px; }
+  .combo-selected-item {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
+    margin-bottom: 6px; font-size: 0.92rem; cursor: grab; user-select: none;
+    transition: background 0.15s;
+  }
+  .combo-selected-item:hover { background: var(--input-bg); }
+  .combo-selected-item .drag-handle { cursor: grab; color: var(--sub-text); }
+  .combo-selected-item .remove-combo {
+    margin-left: auto; cursor: pointer; color: var(--danger); background: none; border: none; font-size: 1.1rem;
+  }
+  .combo-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .combo-separator-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .combo-separator-row label { margin-bottom: 0; }
+  .combo-separator-row input { width: 160px; margin-bottom: 0; }
+
+  /* ★ Preview Modal */
+  .preview-modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--modal-overlay); z-index: 1100;
+    justify-content: center; align-items: center;
+  }
+  .preview-modal-overlay.active { display: flex; }
+  .preview-modal {
+    background: var(--card-bg); border-radius: var(--radius); padding: 28px;
+    min-width: 380px; max-width: 700px; width: 90%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.22); border: 1px solid var(--border);
+    max-height: 85vh; display: flex; flex-direction: column;
+  }
+  .preview-modal h2 {
+    margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    color: var(--primary); font-size: 1.1rem;
+  }
+  .preview-modal-body {
+    flex: 1; overflow-y: auto; background: var(--input-bg);
+    border: 1px solid var(--border); border-radius: 8px; padding: 16px;
+    white-space: pre-wrap; word-break: break-all; font-size: 0.95rem;
+    color: var(--text); line-height: 1.7; min-height: 120px; max-height: 60vh;
+  }
+  .preview-modal-actions {
+    display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--modal-overlay); z-index: 1000;
+    justify-content: center; align-items: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--card-bg); border-radius: var(--radius); padding: 28px;
+    min-width: 340px; max-width: 520px; width: 90%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18); border: 1px solid var(--border);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal h2 { margin-bottom: 18px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+  .cat-list { max-height: 340px; overflow-y: auto; }
+  .cat-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+    border-bottom: 1px solid var(--border); font-size: 0.95rem;
+  }
+  .cat-item .cat-color-btn {
+    width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border);
+    cursor: pointer; flex-shrink: 0; transition: border 0.2s;
+  }
+  .cat-item .cat-color-btn:hover { border-color: var(--primary); }
+  .cat-item input { flex: 1; margin-bottom: 0; padding: 5px 8px; font-size: 0.95rem; }
+  .cat-item .drag-handle { cursor: grab; color: var(--sub-text); font-size: 1.1rem; }
+  .cat-item .cat-del-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1.1rem; }
+  .cat-add-row { display: flex; gap: 8px; margin-top: 10px; }
+  .cat-add-row input { flex: 1; margin-bottom: 0; }
+  .cat-hint { font-size: 0.82rem; color: var(--sub-text); margin-top: 8px; }
+
+  .color-picker-popup {
+    display: none; position: absolute; z-index: 2000; background: var(--card-bg);
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px;
+    box-shadow: var(--shadow); flex-wrap: wrap; gap: 6px; width: 180px;
+  }
+  .color-picker-popup.active { display: flex; }
+  .color-picker-popup .cp-swatch {
+    width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent;
+    cursor: pointer; transition: border 0.2s, transform 0.15s;
+  }
+  .color-picker-popup .cp-swatch:hover { border-color: var(--primary); transform: scale(1.15); }
+
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: #333; color: #fff; padding: 12px 28px; border-radius: 10px;
+    font-size: 0.98rem; z-index: 3000; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show { opacity: 1; pointer-events: auto; }
+
+  @media (max-width: 900px) {
+    .main-container { flex-direction: column; }
+    .left-column { width: 100% !important; min-width: 0; }
+    .resize-handle { display: none; }
+    .right-column { min-width: 0; }
+  }
+  .empty-state { text-align: center; color: var(--sub-text); padding: 30px 10px; font-size: 0.95rem; }
+  ::-webkit-scrollbar { width: 7px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📋 定型文登録ツール</h1>
+  <div class="header-actions">
+    <button onclick="openCategoryModal()">🏷️ カテゴリ管理</button>
+    <button onclick="exportData()">⬇ エクスポート</button>
+    <button onclick="document.getElementById('importFile').click()">⬆ インポート</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️</button>
+  </div>
+</header>
+
+<div class="main-container">
+  <div class="left-column" id="leftColumn">
+    <div class="card">
+      <h2>📝 定型文を登録</h2>
+      <label>登録名</label>
+      <input type="text" id="regName" placeholder="登録名を入力">
+      <label>カテゴリ</label>
+      <select id="regCategory"></select>
+      <label>定型文(複数行OK)</label>
+      <textarea id="regBody" placeholder="定型文を入力..."></textarea>
+      <button class="btn btn-primary" onclick="registerTemplate()" style="width:100%">✚ 登録する</button>
+    </div>
+    <div class="card combo-card" id="comboCard">
+      <h2>🔗 組み合わせ出力</h2>
+      <p style="font-size:0.88rem;color:var(--sub-text);margin-bottom:10px;">登録一覧の☑で定型文を選択 → 合体して出力。ドラッグで順番変更可能。<br>各定型文の間には必ず1行空行が入ります。</p>
+      <div class="combo-separator-row">
+        <label>追加の区切り文字:</label>
+        <input type="text" id="comboSeparator" value="" placeholder="（空欄で改行のみ）">
+      </div>
+      <div class="combo-selected-list" id="comboSelectedList">
+        <div class="empty-state">選択された定型文がありません</div>
+      </div>
+      <div class="combo-actions">
+        <button class="btn btn-primary btn-sm" onclick="generateCombo()" style="flex:1;">▶ 合体して出力</button>
+        <button class="btn btn-success btn-sm" onclick="openPreviewModal()" id="btnPreview" style="flex:1;display:none;">👁 プレビュー</button>
+        <button class="btn btn-outline btn-sm" onclick="clearCombo()">✕ クリア</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="resize-handle" id="resizeHandle"></div>
+
+  <div class="right-column">
+    <div class="card">
+      <div class="list-header">
+        <h2 style="margin-bottom:0;">📂 登録一覧</h2>
+        <span class="badge" id="countBadge">0 件</span>
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" id="searchInput" placeholder="検索..." oninput="renderList()">
+        </div>
+      </div>
+      <div class="filter-tags-row" id="filterTagsRow">
+        <span class="filter-label">絞り込み:</span>
+      </div>
+      <div class="expand-btns">
+        <button onclick="toggleAllGroups(true)">▼ すべて展開</button>
+        <button onclick="toggleAllGroups(false)">▲ すべて折りたたみ</button>
+        <button onclick="toggleAllItems(true)">📄 全項目展開</button>
+        <button onclick="toggleAllItems(false)">📄 全項目折りたたみ</button>
+      </div>
+      <div id="templateList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2>✏️ 定型文を編集</h2>
+    <label>登録名</label>
+    <input type="text" id="editName">
+    <label>カテゴリ</label>
+    <select id="editCategory"></select>
+    <label>定型文</label>
+    <textarea id="editBody"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('editModal')">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h2>🗑️ 削除確認</h2>
+    <p>以下の定型文を削除してもよろしいですか?</p>
+    <p id="deleteTarget" style="font-weight:600;margin-top:8px;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">キャンセル</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div class="modal-overlay" id="categoryModal">
+  <div class="modal">
+    <h2>🏷️ カテゴリ管理</h2>
+    <p style="font-size:0.9rem;color:var(--sub-text);margin-bottom:12px;">カテゴリの追加・編集・削除・並べ替えができます。色の丸をクリックで色変更。</p>
+    <div class="cat-list" id="catList"></div>
+    <div class="cat-add-row">
+      <input type="text" id="newCatName" placeholder="新しいカテゴリ名">
+      <button class="btn btn-primary btn-sm" onclick="addCategory()">+ 追加</button>
+    </div>
+    <p class="cat-hint">💡 ⠿ でドラッグして表示順を変更できます。</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('categoryModal')">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ★ Preview Popup Modal -->
+<div class="preview-modal-overlay" id="previewModal">
+  <div class="preview-modal">
+    <h2>👁 組み合わせ出力 プレビュー</h2>
+    <div class="preview-modal-body" id="previewModalBody"></div>
+    <div class="preview-modal-actions">
+      <button class="btn btn-success btn-sm" onclick="copyFromPreview()">📋 コピー</button>
+      <button class="btn btn-outline btn-sm" onclick="closePreviewModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div class="color-picker-popup" id="colorPicker"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'teikeibun_templates';
+const CAT_STORAGE_KEY = 'teikeibun_categories';
+const THEME_KEY = 'teikeibun_theme';
+const DEFAULT_COLORS = [
+  '#4f8cff','#6c5ce7','#e74c3c','#27ae60','#f39c12',
+  '#e84393','#00cec9','#636e72','#fd79a8','#0984e3',
+  '#55efc4','#ffeaa7','#dfe6e9','#b2bec3','#2d3436',
+  '#a29bfe','#fab1a0','#74b9ff','#81ecec','#fdcb6e'
+];
+
+let templates = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+let categories = JSON.parse(localStorage.getItem(CAT_STORAGE_KEY) || '[]');
+let expandedGroups = {};
+let expandedItems = {};
+let editingId = null;
+let deletingId = null;
+let comboSelection = [];
+let activeFilterCat = '';
+let lastComboText = '';
+
+if (categories.length === 0) {
+  categories = [
+    { id: genId(), name: '一般', color: '#4f8cff' },
+    { id: genId(), name: 'ビジネス', color: '#27ae60' },
+    { id: genId(), name: 'その他', color: '#636e72' }
+  ];
+  saveCategories();
+}
+
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function saveTemplates() { localStorage.setItem(STORAGE_KEY, JSON.stringify(templates)); }
+function saveCategories() { localStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(categories)); }
+
+// Theme
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY) || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('themeBtn').textContent = saved === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const c = document.documentElement.getAttribute('data-theme');
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem(THEME_KEY, n);
+  document.getElementById('themeBtn').textContent = n === 'dark' ? '☀️' : '🌙';
+}
+initTheme();
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// Selects
+function refreshCategorySelects() {
+  [document.getElementById('regCategory'), document.getElementById('editCategory')].forEach(sel => {
+    if (!sel) return;
+    const val = sel.value; sel.innerHTML = '';
+    categories.forEach(cat => {
+      const o = document.createElement('option');
+      o.value = cat.name; o.textContent = cat.name; sel.appendChild(o);
+    });
+    if (val) sel.value = val;
+  });
+  renderFilterTags();
+}
+
+// Filter Tags
+function renderFilterTags() {
+  const row = document.getElementById('filterTagsRow');
+  let h = '<span class="filter-label">絞り込み:</span>';
+  h += `<span class="filter-tag ${activeFilterCat===''?'active':''}" onclick="setFilterCat('')">すべて</span>`;
+  categories.forEach(cat => {
+    h += `<span class="filter-tag ${activeFilterCat===cat.name?'active':''}" onclick="setFilterCat('${escAttr(cat.name)}')"><span class="cat-dot" style="background:${cat.color}"></span>${escHtml(cat.name)}</span>`;
+  });
+  row.innerHTML = h;
+}
+function setFilterCat(c) { activeFilterCat = c; renderFilterTags(); renderList(); }
+
+// Register
+function registerTemplate() {
+  const name = document.getElementById('regName').value.trim();
+  const category = document.getElementById('regCategory').value;
+  const body = document.getElementById('regBody').value;
+  if (!name) { showToast('登録名を入力してください'); return; }
+  if (!body.trim()) { showToast('定型文を入力してください'); return; }
+  templates.push({ id: genId(), name, category, body });
+  saveTemplates();
+  document.getElementById('regName').value = '';
+  document.getElementById('regBody').value = '';
+  renderList(); showToast('登録しました');
+}
+
+// Expand items
+function toggleItemExpand(id) { expandedItems[id] = !expandedItems[id]; renderList(); }
+function toggleAllItems(open) { templates.forEach(t => { expandedItems[t.id] = open; }); renderList(); }
+
+// ===== ★ Template Item Drag & Drop =====
+let dragItemId = null;
+let dragItemCat = null;
+
+function onItemDragStart(e, id, cat) {
+  dragItemId = id;
+  dragItemCat = cat;
+  e.dataTransfer.effectAllowed = 'move';
+  e.target.closest('.template-item').style.opacity = '0.5';
+}
+function onItemDragEnd(e) {
+  e.target.closest('.template-item').style.opacity = '1';
+  document.querySelectorAll('.template-item.drag-over-item').forEach(el => el.classList.remove('drag-over-item'));
+  dragItemId = null; dragItemCat = null;
+}
+function onItemDragOver(e) {
+  e.preventDefault();
+  const item = e.target.closest('.template-item');
+  if (item) {
+    document.querySelectorAll('.template-item.drag-over-item').forEach(el => el.classList.remove('drag-over-item'));
+    item.classList.add('drag-over-item');
+  }
+}
+function onItemDrop(e, dropId, dropCat) {
+  e.preventDefault();
+  document.querySelectorAll('.template-item.drag-over-item').forEach(el => el.classList.remove('drag-over-item'));
+  if (!dragItemId || dragItemId === dropId) return;
+  // 同じカテゴリ内でのみ並べ替え
+  if (dragItemCat !== dropCat) { showToast('同じカテゴリ内でのみ並べ替え可能です'); return; }
+  const fromIdx = templates.findIndex(t => t.id === dragItemId);
+  const toIdx = templates.findIndex(t => t.id === dropId);
+  if (fromIdx === -1 || toIdx === -1) return;
+  const moved = templates.splice(fromIdx, 1)[0];
+  const newToIdx = templates.findIndex(t => t.id === dropId);
+  templates.splice(newToIdx, 0, moved);
+  saveTemplates();
+  renderList();
+}
+
+// Render List
+function renderList() {
+  const container = document.getElementById('templateList');
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const filterCat = activeFilterCat;
+
+  let filtered = templates.filter(t => {
+    const ms = !search || t.name.toLowerCase().includes(search) || t.body.toLowerCase().includes(search);
+    const mc = !filterCat || t.category === filterCat;
+    return ms && mc;
+  });
+
+  document.getElementById('countBadge').textContent = filtered.length + ' 件';
+
+  const catOrder = categories.map(c => c.name);
+  const groups = {};
+  filtered.forEach(t => { const c = t.category || 'その他'; if (!groups[c]) groups[c] = []; groups[c].push(t); });
+
+  const sortedCats = Object.keys(groups).sort((a, b) => {
+    const ia = catOrder.indexOf(a); const ib = catOrder.indexOf(b);
+    return (ia===-1?999:ia) - (ib===-1?999:ib);
+  });
+
+  if (sortedCats.length === 0) {
+    container.innerHTML = '<div class="empty-state">定型文がありません</div>'; return;
+  }
+
+  let html = '';
+  sortedCats.forEach(cat => {
+    const catObj = categories.find(c => c.name === cat);
+    const color = catObj ? catObj.color : '#636e72';
+    const isOpen = expandedGroups[cat] !== false;
+    html += `<div class="template-group">
+      <div class="template-group-header" onclick="toggleGroup('${escAttr(cat)}')">
+        <span class="cat-dot" style="background:${color}"></span>
+        <span class="arrow ${isOpen?'open':''}">▶</span>
+        <span>${escHtml(cat)}</span>
+        <span style="color:var(--sub-text);font-weight:400;font-size:0.88rem;margin-left:auto;">${groups[cat].length}件</span>
+      </div>
+      <div class="template-group-items" style="display:${isOpen?'block':'none'}">`;
+    groups[cat].forEach(t => {
+      const checked = comboSelection.includes(t.id) ? 'checked' : '';
+      const isItemOpen = !!expandedItems[t.id];
+      const expandIcon = isItemOpen ? '▲' : '▼';
+      const expandTitle = isItemOpen ? '折りたたむ' : '展開する';
+      const eCat = escAttr(cat);
+
+      html += `<div class="template-item ${isItemOpen?'expanded':''}" draggable="true"
+        ondragstart="onItemDragStart(event,'${t.id}','${eCat}')"
+        ondragend="onItemDragEnd(event)"
+        ondragover="onItemDragOver(event)"
+        ondrop="onItemDrop(event,'${t.id}','${eCat}')">
+        <span class="tpl-drag-handle" title="ドラッグで並べ替え">⠿</span>
+        <input type="checkbox" class="combo-check" title="組み合わせ出力に追加" ${checked} onchange="toggleComboItem('${t.id}',this.checked)">
+        <div class="template-item-info">
+          <div class="tpl-name">${escHtml(t.name)}</div>
+          <div class="tpl-body ${isItemOpen?'open':''}">${escHtml(t.body)}</div>
+        </div>
+        <div class="tpl-actions">
+          <button class="expand-btn" onclick="toggleItemExpand('${t.id}')" title="${expandTitle}">${expandIcon}</button>
+          <button onclick="copyText(\`${escJs(t.body)}\`)" title="コピー">📋</button>
+          <button onclick="openEdit('${t.id}')" title="編集">✏️</button>
+          <button class="del-btn" onclick="openDelete('${t.id}')" title="削除">🗑️</button>
+        </div>
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
+}
+
+function toggleGroup(cat) { expandedGroups[cat] = expandedGroups[cat]===false?true:false; renderList(); }
+function toggleAllGroups(open) {
+  [...new Set(templates.map(t=>t.category||'その他'))].forEach(c=>expandedGroups[c]=open); renderList();
+}
+
+function copyText(text) { navigator.clipboard.writeText(text).then(()=>showToast('コピーしました')); }
+
+// Edit
+function openEdit(id) {
+  const t = templates.find(x=>x.id===id); if(!t)return;
+  editingId = id;
+  document.getElementById('editName').value = t.name;
+  document.getElementById('editBody').value = t.body;
+  refreshCategorySelects();
+  document.getElementById('editCategory').value = t.category;
+  document.getElementById('editModal').classList.add('active');
+}
+function saveEdit() {
+  const t = templates.find(x=>x.id===editingId); if(!t)return;
+  t.name = document.getElementById('editName').value.trim();
+  t.category = document.getElementById('editCategory').value;
+  t.body = document.getElementById('editBody').value;
+  if(!t.name){showToast('登録名を入力してください');return;}
+  saveTemplates(); closeModal('editModal'); renderList(); showToast('保存しました');
+}
+
+// Delete
+function openDelete(id) {
+  const t = templates.find(x=>x.id===id); if(!t)return;
+  deletingId = id;
+  document.getElementById('deleteTarget').textContent = t.name;
+  document.getElementById('deleteModal').classList.add('active');
+}
+function confirmDelete() {
+  templates = templates.filter(x=>x.id!==deletingId);
+  comboSelection = comboSelection.filter(id=>id!==deletingId);
+  delete expandedItems[deletingId];
+  saveTemplates(); closeModal('deleteModal'); renderList(); renderComboList(); showToast('削除しました');
+}
+
+// Modal
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('active');});
+});
+
+// Category Modal
+function openCategoryModal() { renderCategoryList(); document.getElementById('categoryModal').classList.add('active'); }
+function renderCategoryList() {
+  const list = document.getElementById('catList'); let h = '';
+  categories.forEach((cat,idx)=>{
+    h += `<div class="cat-item" draggable="true" data-cat-idx="${idx}">
+      <span class="drag-handle" title="ドラッグで並べ替え">⠿</span>
+      <button class="cat-color-btn" style="background:${cat.color}" onclick="openColorPicker(this,${idx})" title="色変更"></button>
+      <input type="text" value="${escAttr(cat.name)}" onchange="renameCat(${idx},this.value)">
+      <button class="cat-del-btn" onclick="deleteCat(${idx})" title="削除">✕</button>
+    </div>`;
+  });
+  list.innerHTML = h; initCatDrag();
+}
+function addCategory() {
+  const input = document.getElementById('newCatName');
+  const name = input.value.trim(); if(!name)return;
+  if(categories.find(c=>c.name===name)){showToast('同名のカテゴリが存在します');return;}
+  categories.push({id:genId(),name,color:DEFAULT_COLORS[categories.length%DEFAULT_COLORS.length]});
+  saveCategories(); input.value=''; renderCategoryList(); refreshCategorySelects(); showToast('カテゴリを追加しました');
+}
+function renameCat(idx,newName) {
+  const old = categories[idx].name; if(!newName.trim())return;
+  categories[idx].name = newName.trim();
+  templates.forEach(t=>{if(t.category===old)t.category=newName.trim();});
+  saveCategories(); saveTemplates(); refreshCategorySelects(); renderList();
+}
+function deleteCat(idx) {
+  categories.splice(idx,1); saveCategories(); renderCategoryList();
+  refreshCategorySelects(); renderList(); showToast('カテゴリを削除しました');
+}
+function initCatDrag() {
+  const items = document.querySelectorAll('.cat-item'); let di = null;
+  items.forEach(item=>{
+    item.addEventListener('dragstart',e=>{di=parseInt(item.dataset.catIdx);e.dataTransfer.effectAllowed='move';item.style.opacity='0.5';});
+    item.addEventListener('dragend',()=>{item.style.opacity='1';});
+    item.addEventListener('dragover',e=>{e.preventDefault();});
+    item.addEventListener('drop',e=>{
+      e.preventDefault(); const drop=parseInt(item.dataset.catIdx);
+      if(di===null||di===drop)return;
+      const moved=categories.splice(di,1)[0]; categories.splice(drop,0,moved);
+      saveCategories(); renderCategoryList(); refreshCategorySelects(); renderList();
+    });
+  });
+}
+
+// Color Picker
+function openColorPicker(btn,catIdx) {
+  const picker = document.getElementById('colorPicker'); picker.innerHTML='';
+  DEFAULT_COLORS.forEach(c=>{
+    const s = document.createElement('div'); s.className='cp-swatch'; s.style.background=c;
+    s.onclick=()=>{categories[catIdx].color=c;saveCategories();renderCategoryList();refreshCategorySelects();renderList();picker.classList.remove('active');};
+    picker.appendChild(s);
+  });
+  const r=btn.getBoundingClientRect();
+  picker.style.top=(r.bottom+4)+'px'; picker.style.left=r.left+'px'; picker.classList.add('active');
+  setTimeout(()=>{
+    const close=e=>{if(!picker.contains(e.target)&&e.target!==btn){picker.classList.remove('active');document.removeEventListener('click',close);}};
+    document.addEventListener('click',close);
+  },10);
+}
+
+// ===== Export / ★ Import (追加登録) =====
+function exportData() {
+  const data = {version:2,templates,categories,exportDate:new Date().toISOString()};
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '定型文データ_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); showToast('エクスポートしました');
+}
+function importData(event) {
+  const file = event.target.files[0]; if(!file)return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      let importedTemplates = [];
+      let importedCategories = [];
+
+      // Parse format
+      if (data.version === 2 && Array.isArray(data.templates)) {
+        importedTemplates = data.templates;
+        if (Array.isArray(data.categories)) importedCategories = data.categories;
+      } else if (Array.isArray(data)) {
+        importedTemplates = data.map(t=>({
+          id:t.id||genId(), name:t.name||t.title||'名称なし',
+          category:t.category||t.cat||'その他', body:t.body||t.text||t.content||''
+        }));
+      } else if (data.templates && Array.isArray(data.templates)) {
+        importedTemplates = data.templates.map(t=>({
+          id:t.id||genId(), name:t.name||t.title||'名称なし',
+          category:t.category||t.cat||'その他', body:t.body||t.text||t.content||''
+        }));
+        if (Array.isArray(data.categories)) {
+          importedCategories = data.categories.map(c=>({
+            id:c.id||genId(), name:c.name||'不明', color:c.color||'#636e72'
+          }));
+        }
+      } else {
+        showToast('未対応のファイル形式です'); event.target.value=''; return;
+      }
+
+      // ★ 追加登録: IDを新規発行して重複を避ける
+      const existingIds = new Set(templates.map(t => t.id));
+      importedTemplates.forEach(t => {
+        t.id = genId(); // 常に新規IDを割り当てて追加
+        templates.push(t);
+      });
+
+      // カテゴリも未登録のものだけ追加
+      const existingCatNames = new Set(categories.map(c => c.name));
+      importedCategories.forEach(c => {
+        if (!existingCatNames.has(c.name)) {
+          categories.push({ id: genId(), name: c.name, color: c.color || DEFAULT_COLORS[categories.length % DEFAULT_COLORS.length] });
+          existingCatNames.add(c.name);
+        }
+      });
+      // テンプレートのカテゴリも自動追加
+      templates.forEach(t => {
+        if (t.category && !existingCatNames.has(t.category)) {
+          categories.push({ id: genId(), name: t.category, color: DEFAULT_COLORS[categories.length % DEFAULT_COLORS.length] });
+          existingCatNames.add(t.category);
+        }
+      });
+
+      saveTemplates(); saveCategories(); refreshCategorySelects(); renderList();
+      showToast('追加インポートしました (+' + importedTemplates.length + '件)');
+    } catch(err) {
+      showToast('ファイルの読み込みに失敗しました'); console.error(err);
+    }
+    event.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+// ===== ★ Combination Output (区切りに必ず1行改行) =====
+function toggleComboItem(id,checked) {
+  if(checked){if(!comboSelection.includes(id))comboSelection.push(id);}
+  else comboSelection=comboSelection.filter(x=>x!==id);
+  renderComboList();
+  // 出力済みテキストをリセット
+  lastComboText = '';
+  document.getElementById('btnPreview').style.display = 'none';
+}
+function renderComboList() {
+  const list = document.getElementById('comboSelectedList');
+  if(comboSelection.length===0){
+    list.innerHTML='<div class="empty-state">選択された定型文がありません</div>';
+    document.getElementById('btnPreview').style.display='none';
+    lastComboText='';
+    return;
+  }
+  let h='';
+  comboSelection.forEach((id,idx)=>{
+    const t=templates.find(x=>x.id===id); if(!t)return;
+    h+=`<div class="combo-selected-item" draggable="true" data-combo-idx="${idx}">
+      <span class="drag-handle">⠿</span><span>${escHtml(t.name)}</span>
+      <button class="remove-combo" onclick="removeComboItem('${id}')">✕</button>
+    </div>`;
+  });
+  list.innerHTML=h; initComboDrag();
+}
+function removeComboItem(id) {
+  comboSelection=comboSelection.filter(x=>x!==id);
+  lastComboText=''; document.getElementById('btnPreview').style.display='none';
+  renderComboList(); renderList();
+}
+function clearCombo() {
+  comboSelection=[];
+  lastComboText=''; document.getElementById('btnPreview').style.display='none';
+  renderComboList(); renderList();
+}
+
+function generateCombo() {
+  if(comboSelection.length===0){showToast('定型文を選択してください');return;}
+
+  // 追加の区切り文字を取得
+  let extraSep = document.getElementById('comboSeparator').value;
+  extraSep = extraSep.replace(/\\n/g,'\n').replace(/\\t/g,'\t');
+
+  const texts = comboSelection.map(id=>{
+    const t=templates.find(x=>x.id===id); return t?t.body:'';
+  }).filter(x=>x);
+
+  // ★ 必ず上下に1行改行（空行）を入れる
+  // 結合形式: テキスト1 + \n\n + (追加区切り) + \n\n + テキスト2 ...
+  let separator;
+  if (extraSep.trim() === '') {
+    separator = '\n\n';
+  } else {
+    separator = '\n\n' + extraSep + '\n\n';
+  }
+
+  lastComboText = texts.join(separator);
+  document.getElementById('btnPreview').style.display = 'inline-flex';
+  showToast('合体完了！プレビューで確認できます');
+}
+
+// ★ Preview Popup
+function openPreviewModal() {
+  if(!lastComboText){showToast('先に「合体して出力」を実行してください');return;}
+  document.getElementById('previewModalBody').textContent = lastComboText;
+  document.getElementById('previewModal').classList.add('active');
+}
+function closePreviewModal() {
+  document.getElementById('previewModal').classList.remove('active');
+}
+function copyFromPreview() {
+  navigator.clipboard.writeText(lastComboText).then(()=>showToast('コピーしました'));
+}
+// Preview overlay click to close
+document.getElementById('previewModal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('previewModal')) closePreviewModal();
+});
+
+function initComboDrag() {
+  const items=document.querySelectorAll('.combo-selected-item'); let di=null;
+  items.forEach(item=>{
+    item.addEventListener('dragstart',e=>{di=parseInt(item.dataset.comboIdx);e.dataTransfer.effectAllowed='move';item.style.opacity='0.5';});
+    item.addEventListener('dragend',()=>{item.style.opacity='1';});
+    item.addEventListener('dragover',e=>{e.preventDefault();});
+    item.addEventListener('drop',e=>{
+      e.preventDefault(); const drop=parseInt(item.dataset.comboIdx);
+      if(di===null||di===drop)return;
+      const moved=comboSelection.splice(di,1)[0]; comboSelection.splice(drop,0,moved);
+      renderComboList();
+    });
+  });
+}
+
+// Resize Handle
+(function(){
+  const handle=document.getElementById('resizeHandle');
+  const left=document.getElementById('leftColumn');
+  let isR=false,sX,sW;
+  handle.addEventListener('mousedown',e=>{
+    isR=true;sX=e.clientX;sW=left.offsetWidth;handle.classList.add('active');
+    document.body.style.cursor='col-resize';document.body.style.userSelect='none';e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!isR)return;
+    left.style.width=Math.max(280,Math.min(800,sW+(e.clientX-sX)))+'px';
+  });
+  document.addEventListener('mouseup',()=>{
+    if(isR){isR=false;handle.classList.remove('active');document.body.style.cursor='';document.body.style.userSelect='';}
+  });
+})();
+
+// Escape
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function escJs(s){return String(s).replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/\$/g,'\\$');}
+
+// Init
+refreshCategorySelects(); renderList(); renderComboList();
+</script>
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
