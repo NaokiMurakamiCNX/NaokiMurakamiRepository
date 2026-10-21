@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ログ作成ツール</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <header class="panel-header">
+    <div>
+      <h1>ログ作成ツール</h1>
+      <p>Side Panel版</p>
+    </div>
+    <button id="reloadTool" type="button" title="ツールを再読み込み">再読込</button>
+  </header>
+
+  <main class="panel-main">
+    <!--
+      tool.html に既存の「ログ作成ツール ver2.1.2.html」の中身を配置してください。
+      既存HTMLはインラインscript / onclickを含むため、manifest.jsonでsandboxページとして登録しています。
+    -->
+    <iframe id="toolFrame" src="tool.html" title="ログ作成ツール本体" sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads"></iframe>
+  </main>
+
+  <footer class="panel-footer">
+    <span>v2.1.2-sidepanel.2</span>
+    <span>Chrome Side Panel</span>
+  </footer>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

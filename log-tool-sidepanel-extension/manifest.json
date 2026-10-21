@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "ログ作成ツール Side Panel",
+  "version": "2.1.2",
+  "version_name": "ver2.1.2 Side Panel",
+  "description": "ログ作成ツールをChromeのサイドパネルで利用するための拡張機能です。",
+  "minimum_chrome_version": "114",
+  "permissions": [
+    "sidePanel"
+  ],
+  "action": {
+    "default_title": "ログ作成ツールを開く"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "sandbox": {
+    "pages": [
+      "tool.html"
+    ]
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';",
+    "sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval'; object-src 'self';"
+  }
+}

@@ -1,0 +1,1888 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ログ作成ツール ver2.1.1</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family:"Meiryo",sans-serif; margin:0; padding:16px; background:#f5f5f5; }
+  h1 { font-size:1.4em; }
+  h2 { border-bottom:2px solid #444; padding-bottom:4px; font-size:1.15em; }
+  h3 { margin-top:16px; font-size:1.05em; }
+  h4 { margin:8px 0 4px; }
+  .section { background:#fff; padding:15px; margin-bottom:16px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.15); }
+  .row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:8px; }
+  .row label { flex:0 1 220px; font-weight:bold; }
+  .row input[type=text], .row input[type=email], .row input[type=date], .row select {
+    flex:1 1 200px; min-width:100px; max-width:100%; padding:5px; border-radius:6px; border:1px solid #ccc;
+  }
+  .row input:disabled, .row select:disabled {
+    background:#eee; color:#999; cursor:not-allowed;
+  }
+
+  #customerInfoSection .row,
+  #inquirySection .row {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin-bottom: 8px;
+    width: 100%;
+  }
+  #customerInfoSection .row label,
+  #inquirySection .row label {
+    flex: 0 0 auto;
+    font-size: 0.78em;
+    font-weight: normal;
+    white-space: nowrap;
+  }
+  #customerInfoSection .row input[type=text],
+  #customerInfoSection .row input[type=email],
+  #inquirySection .row input[type=text],
+  #inquirySection .row select {
+    flex: 1 1 auto;
+    min-width: 60px;
+  }
+
+  textarea { width:100%; min-height:70px; padding:5px; border-radius:6px; border:1px solid #ccc; }
+  input, select, textarea { border-radius:6px; }
+
+  /* 上部ボタンを固定表示 */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background:#f5f5f5;
+    padding:10px 0 12px 0;
+    margin-bottom:16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.15);
+  }
+  .top-btn { padding:10px 20px; margin-right:10px; margin-bottom:0; border:none; border-radius:6px; color:#fff; font-size:1em; cursor:pointer; font-weight:bold; }
+  .btn-memo { background:#4a90e2; }
+  .btn-memo:hover { background:#3a7bc8; }
+  .btn-cte { background:#3ec96a; }
+  .btn-cte:hover { background:#2fb057; }
+  .btn-secall { background:#f5c518; color:#3a3000; }
+  .btn-secall:hover { background:#e0b30f; }
+  .btn-transfer { background:#ff5fa2; }
+  .btn-transfer:hover { background:#ff3d8f; }
+  .btn-reset { background:#e74c3c; }
+  .btn-reset:hover { background:#d63c2c; }
+
+  .cat-btn, .type-btn { padding:8px 14px; margin:4px 4px 4px 0; cursor:pointer; background:#3572b0; color:#fff; border:none; border-radius:6px; }
+  .type-btn.active { background:#e08a1e; }
+  .jdd-btn { background:#8e44ad; }
+  .jdd-btn.active { background:#6c3483; }
+  .checklist { display:none; margin-top:10px; padding:10px; border:1px solid #ccc; background:#fafafa; border-radius:6px; }
+  .checklist.show { display:block; }
+  .checklist label { font-weight:normal; display:block; margin-bottom:4px; }
+  .note { color:#888; font-size:0.85em; margin:2px 0; }
+  .jdd-note { color:#c0392b; font-size:0.85em; margin:2px 0; }
+  .adInput { flex:1 1 200px; display:none; }
+  .green-btn { background:#2e8b3e; color:#fff; border:none; padding:8px 18px; font-size:0.95em; border-radius:6px; cursor:pointer; margin-top:8px; }
+  .green-btn:hover { background:#246b30; }
+  .output-btn { background:#b03636; color:#fff; border:none; padding:12px 24px; font-size:1.1em; border-radius:6px; cursor:pointer; margin-top:20px; }
+  #closingSection { display:none; }
+  #repairCommon, #pickupPanel, #onsitePanel, #partsPanel, #l2Section, #paidRepairPanel, #jddPanel { display:none; }
+  textarea.result { width:100%; min-height:320px; font-family:monospace; border-radius:6px; }
+  .fixed-line { color:#555; font-style:italic; margin:2px 0; }
+  .toggle-btn { padding:6px 12px; margin-right:6px; cursor:pointer; border:1px solid #999; background:#eee; border-radius:6px; }
+  .toggle-btn.active { background:#3572b0; color:#fff; }
+  .memo-box { background:#fff3cd; padding:10px; border-radius:6px; margin-bottom:10px; font-size:0.9em; }
+  .subblock { border-left:3px solid #3572b0; padding-left:12px; margin:10px 0; background:#f9fbff; border-radius:0 6px 6px 0; }
+  .hidden { display:none; }
+  @media (max-width:600px){ .row label{flex-basis:100%;} .row input,.row select{flex-basis:100%;} }
+</style>
+</head>
+<body>
+
+<h1>ログ作成ツール ver2.1.1</h1>
+
+<!-- ============ 最上部ボタン（固定表示） ============ -->
+<div class="top-bar">
+  <button class="top-btn btn-memo" onclick="openMemoPopup()">メモ帳</button>
+  <button class="top-btn btn-cte" onclick="openCtePopup()">CTEテンプレ</button>
+  <button class="top-btn btn-secall" onclick="openSeCallPopup()">SEコール</button>
+  <button class="top-btn btn-transfer" onclick="openTransferPopup()">転送</button>
+  <button class="top-btn btn-reset" onclick="if(confirm('全ての入力内容をリセットします。よろしいですか？')) location.reload();">リセット</button>
+</div>
+
+<!-- ============ エージェント向け確認事項メモ（ログ出力対象外） ============ -->
+<div class="section">
+  <div class="memo-box">
+    ☆手元に製品はある？<br>
+    ☆このTAGで過去3ヶ月以内にCaseあるか確認しある場合は謝辞/ログ記載必須<br>
+    ☆保証切れまで2ヶ月切ってたら教えてあげよう<br>
+    ☆2分以上お待たせしていたら謝罪
+  </div>
+</div>
+
+<!-- ============ お客様情報（Case#を一番上に追加） ============ -->
+<div class="section" id="customerInfoSection">
+  <h2>■お客様情報</h2>
+  <div class="row"><label>Case＃：</label><input type="text" id="caseNumber"></div>
+  <div class="row"><label>TAG/EXP#：</label><input type="text" id="tag"></div>
+  <div class="row"><label>機種名：</label><input type="text" id="model"></div>
+  <div class="row"><label>保証：</label><input type="text" id="warranty"></div>
+  <div class="row"><label>法人名：</label><input type="text" id="company"></div>
+  <div class="row"><label>担当者名：</label><input type="text" id="contactName"></div>
+  <div class="row"><label>電話番号1：</label><input type="text" id="tel1"></div>
+  <div class="row"><label>電話番号2（修理手配時は確認必須）：</label><input type="text" id="tel2"></div>
+  <div class="row"><label>E-mail：</label><input type="email" id="email"></div>
+  <div class="row">
+    <label>希望連絡方法：</label>
+    <button class="toggle-btn" onclick="setContactMethod('電話', this)">電話</button>
+    <button class="toggle-btn" onclick="setContactMethod('メール', this)">メール</button>
+    <button class="toggle-btn" onclick="setContactMethod('どちらでも', this)">どちらでも</button>
+    <button class="toggle-btn" onclick="setContactMethod('拒否', this)">拒否</button>
+  </div>
+</div>
+
+<!-- ============ 症状 ============ -->
+<div class="section">
+  <h2>症状</h2>
+  <div class="row"><label>直接記入：</label><textarea id="symptomDirect" placeholder="直接記入する場合はこちら"></textarea></div>
+  <div class="row">
+    <button class="cat-btn" onclick="toggleList('hwList')">Case title用：HW</button>
+    <button class="cat-btn" onclick="toggleList('swList')">Case title用：SW</button>
+    <button class="cat-btn" onclick="toggleList('otherList')">Case title用：その他</button>
+  </div>
+  <div id="hwList" class="checklist"></div>
+  <div id="swList" class="checklist"></div>
+  <div id="otherList" class="checklist"></div>
+</div>
+
+<!-- ============ 問合せ内容 ============ -->
+<div class="section" id="inquirySection">
+  <h2>■問合せ内容</h2>
+  <h3>◯確認事項◯</h3>
+  <div class="row"><label>いつから：</label><input type="text" id="since"></div>
+  <div class="row"><label>きっかけ：</label><input type="text" id="trigger"></div>
+  <div class="row"><label>頻度：</label><input type="text" id="frequency"></div>
+  <div class="row"><label>発生ﾀｲﾐﾝｸﾞ：</label><input type="text" id="timing"></div>
+  <div class="row"><label>増設：</label><input type="text" id="addon"></div>
+
+  <div class="row">
+    <label>Diag：/Validation Code：</label>
+    <select id="diagResult" onchange="onDiagChange()">
+      <option value="">未選択</option>
+      <option value="Pass">Pass</option>
+      <option value="Fail">Fail</option>
+      <option value="NotApplicable">NotApplicable(実施不可)</option>
+    </select>
+  </div>
+  <div class="row hidden" id="diagErrorRow"><label>エラーコード：</label><input type="text" id="diagErrorCode"></div>
+  <div class="row hidden" id="diagVdRow"><label>VD Code：</label><input type="text" id="diagVdCode"></div>
+  <div class="row hidden" id="diagNARow">
+    <label>Diag未実施の理由：</label>
+    <select id="diagNAReason">
+      <option value="">未選択</option>
+      <option>お客様実施拒否</option>
+      <option>PCが手元にない</option>
+      <option>NPPVのため実施不可</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label>LCD Bist：</label>
+    <select id="lcdbist">
+      <option value="">未選択</option>
+      <option>未実施</option>
+      <option>非該当</option>
+      <option>Pass</option>
+      <option>Fail</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label>ﾃﾞｰﾀﾛｽﾄ免責：</label>
+    <select id="dataLossDisclaimer">
+      <option value="">未選択</option>
+      <option>済</option>
+      <option>未実施</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label>CRUﾊﾟｰﾂ取り外し案内：</label>
+    <select id="cruGuideNormal">
+      <option value="">未選択</option>
+      <option>非該当</option>
+      <option>実施</option>
+      <option>未実施</option>
+    </select>
+  </div>
+
+  <div class="memo-box">
+    ちなみに、お客様が今回お問い合わせいただく製品は日本国内でご使用されているものでしょうか？
+  </div>
+  <div class="row">
+    <label>貿易コンプライアンスについて：</label>
+    <select id="tradeCompliance">
+      <option value="">未選択</option>
+      <option value="確認済">確認済</option>
+      <option value="未確認">未確認</option>
+    </select>
+  </div>
+  <p class="fixed-line">・入電者所在地：日本</p>
+  <p class="fixed-line">・パソコンの使用場所：日本</p>
+</div>
+
+<!-- ============ 案内(切り分け)内容 ============ -->
+<div class="section">
+  <h2>■案内(切り分け)内容</h2>
+  <textarea id="guidanceContent" style="min-height:120px;"></textarea>
+</div>
+
+<!-- ============ 修理タイプ選択 ============ -->
+<div class="section">
+  <h2>修理の有無</h2>
+  <button class="type-btn" onclick="setRepairType('none')" id="btn_none">修理なし</button>
+  <button class="type-btn" onclick="setRepairType('pickup')" id="btn_pickup">引き取り修理</button>
+  <button class="type-btn" onclick="setRepairType('onsite')" id="btn_onsite">訪問修理</button>
+  <button class="type-btn" onclick="setRepairType('parts')" id="btn_parts">パーツ発送修理</button>
+  <button class="type-btn jdd-btn" onclick="setRepairType('jdd')" id="btn_jdd">JDD</button>
+</div>
+
+<!-- ============ 有償修理？ ============ -->
+<div class="section">
+  <h2>有償修理？</h2>
+  <div class="row">
+    <button class="toggle-btn" id="paidRepair_yesBtn" onclick="setToggle('paidRepair', true, this)">はい</button>
+    <button class="toggle-btn" id="paidRepair_noBtn" onclick="setToggle('paidRepair', false, this)">いいえ</button>
+  </div>
+  <div id="paidRepairPanel" class="subblock">
+    <h3>◆ご請求/見積先</h3>
+    <p class="note">※修理先と別の場合記載（この注意書きはログに出力されません）</p>
+    <div class="row"><label>会社名：</label><input type="text" id="paid_company"></div>
+    <div class="row"><label>名前（フルネーム）：</label><input type="text" id="paid_name"></div>
+    <div class="row"><label>住所：</label><input type="text" id="paid_address"></div>
+    <div class="row"><label>電話番号：</label><input type="text" id="paid_tel"></div>
+    <div class="row"><label>請求先Email：</label><input type="text" id="paid_billingEmail"></div>
+    <div class="row"><label>見積送付先Email：</label><input type="text" id="paid_quoteEmail"></div>
+    <p class="note">※見積先と請求先が同じか確認してください（この注意書きはログに出力されません）</p>
+    <div class="row"><label>手配パーツ：</label><input type="text" id="paid_dispatchParts"></div>
+    <p class="jdd-note hidden" id="jddDispatchNote">※JDDのときは不要です</p>
+  </div>
+</div>
+
+<!-- ============ 修理共通情報（JDD時は非表示） ============ -->
+<div class="section" id="repairCommon">
+  <h2>■修理共通情報</h2>
+  <div class="row">
+    <label>WO作成方法：</label>
+    <select id="woMethod" onchange="onWoMethodChange()">
+      <option value="1">C:1 DTCから「ﾃﾞｨｽﾊﾟｯﾁの作成」をｸﾘｯｸしてSWO使用</option>
+      <option value="2">C:2 DTCから「直接ﾃﾞｨｽﾊﾟｯﾁ」をｸﾘｯｸしてSWO使用</option>
+      <option value="3">C:3 SFDCからﾄｸﾞﾙﾎﾞﾀﾝをｸﾘｯｸしてSWO使用</option>
+      <option value="4">C:4 SFDCからそのままCreateしてﾏﾆｭｱﾙ作成</option>
+    </select>
+  </div>
+  <div class="row" id="woReasonRow" style="display:none;">
+    <label>理由：</label>
+    <select id="woReason" onchange="onWoReasonChange()">
+      <option value="">選択してください</option>
+      <option value="LKB記事使用のため">LKB記事使用のため</option>
+      <option value="ﾃﾞｨｽﾊﾟｯﾁの作成ﾎﾞﾀﾝが表示されないため">ﾃﾞｨｽﾊﾟｯﾁの作成ﾎﾞﾀﾝが表示されないため</option>
+      <option value="ﾃﾞｨｽﾊﾟｯﾁの作成ﾎﾞﾀﾝを押したが、SWOの画面に遷移せず、通常のSFDCの画面となるため">ﾃﾞｨｽﾊﾟｯﾁの作成ﾎﾞﾀﾝを押したが、SWOの画面に遷移せず、通常のSFDCの画面となるため</option>
+      <option value="切り分け不十分でのPWR承りのためDTC進行不可。村上TMにESC済">切り分け不十分でのPWR承りのためDTC進行不可。村上TMにESC済</option>
+      <option value="BO承認のNMD手配のため">BO承認のNMD手配のため</option>
+      <option value="O#からのWO作成のためDTC未使用">O#からのWO作成のためDTC未使用</option>
+      <option value="manual">（手書き）直接記入する</option>
+    </select>
+    <input type="text" id="woReasonManual" style="display:none; flex:1 1 250px;" placeholder="理由を直接入力">
+  </div>
+  <div class="row"><label>作成者：</label><input type="text" id="creatorName"></div>
+</div>
+
+<!-- ============ 引き取り修理 ============ -->
+<div class="section" id="pickupPanel">
+  <h2>■引き取り修理 専用項目</h2>
+  <div class="memo-box">
+    🔹免責事項（お客様への説明事項）<br>
+    ・近日中に住所変更があった場合、修理がキャンセルされ大幅に遅延します<br>
+    ・ご申告Tagと入荷されたTagに違いがあった場合、修理の再手配が発生します<br>
+    ・修理時、データの保証不可 バックアップを推奨<br>
+    ・他の症状、破損がないか確認<br>
+    ・【New!】集荷と返却は「日本通運」が行います。<br>
+    ・【New!】ご不在の際は不在票が投函されますので、再集荷の手配をお客様ご自身でお願いします。<br>
+    ・周辺機器を取り外し、本体PCのみお渡しください<br>
+    ・TSからの指定機器を集荷時に渡してください<br>
+    ・通常二週間前後で返却（パーツ状況により前後）<br>
+    ・破損や液損の場合、有償修理対応（もしくはAD保証対応）になります<br>
+    ・修理部品は代替品やアップグレード部品になる場合あり<br>
+    ・OS再インストール時、工場出荷時のDell製アプリが消えます<br>
+    ・製品購入時の初期構成（OS等）に変更される場合がございます<br>
+    ・【New!】（修理先/入電者が別の場合のみ）修理中・修理後のフォローはどなた宛にご連絡すればよろしいでしょうか？<br>
+  </div>
+  <div class="row"><label>引取希望日：</label><input type="date" id="pk_date"></div>
+  <p class="note">※有償修理の場合は記載不要でOK（この注意書きはログに出力されません）</p>
+  <div class="row"><label>希望時間帯：</label>
+    <select id="pk_timeband"><option value="">未選択</option><option>午前</option><option>午後</option><option>いつでも</option></select>
+  </div>
+  <h3>集荷先詳細（連絡先は2つ聞いてください）</h3>
+  <div class="row"><label>入電者と修理先は同じ？</label>
+    <button class="toggle-btn" onclick="setToggle('pk_same', true, this)">はい</button>
+    <button class="toggle-btn" onclick="setToggle('pk_same', false, this)">いいえ</button>
+  </div>
+  <div id="pk_same_yes" class="subblock hidden">
+    <div class="row"><label>郵便番号：</label><input type="text" id="pk_zip"></div>
+    <div class="row"><label>住所：</label><input type="text" id="pk_addr"></div>
+  </div>
+  <div id="pk_same_no" class="subblock hidden">
+    <div class="row"><label>郵便番号：</label><input type="text" id="pk_zip2"></div>
+    <div class="row"><label>住所：</label><input type="text" id="pk_addr2"></div>
+    <div class="row"><label>法人名：</label><input type="text" id="pk_company2"></div>
+    <div class="row"><label>担当者：</label><input type="text" id="pk_contact2"></div>
+    <div class="row"><label>電話番号1：</label><input type="text" id="pk_tel1_2"></div>
+    <div class="row"><label>電話番号2：</label><input type="text" id="pk_tel2_2"></div>
+    <div class="row"><label>E-mail：</label><input type="text" id="pk_email2"></div>
+  </div>
+  <div class="row"><label>返却先が同じ？</label>
+    <button class="toggle-btn" onclick="setToggle('pk_return', true, this)">はい</button>
+    <button class="toggle-btn" onclick="setToggle('pk_return', false, this)">いいえ</button>
+  </div>
+  <div id="pk_return_no" class="subblock hidden">
+    <div class="row"><label>郵便番号：</label><input type="text" id="pk_return_zip"></div>
+    <div class="row"><label>住所：</label><input type="text" id="pk_return_addr"></div>
+    <div class="row"><label>法人名：</label><input type="text" id="pk_return_company"></div>
+    <div class="row"><label>担当者：</label><input type="text" id="pk_return_contact"></div>
+    <div class="row"><label>電話番号1：</label><input type="text" id="pk_return_tel1"></div>
+    <div class="row"><label>電話番号2：</label><input type="text" id="pk_return_tel2"></div>
+    <div class="row"><label>E-mail：</label><input type="text" id="pk_return_email"></div>
+  </div>
+  <h3>🛠 修理オプション</h3>
+  <div class="row"><label>現象未再現時の対応：</label>
+    <select id="pk_notReproduced">
+      <option value="">未選択</option>
+      <option>現象未再現時はそのまま返却ください</option>
+      <option>現象未再現時はTSへRHOLD連絡をお願いします</option>
+      <option>現象未再現時は～時間の高負荷エージングテスト、複数回のコールドブートを実施いただき問題ないことを確認のうえ返却願います</option>
+    </select>
+  </div>
+
+  <!-- ★分割：OS再インストール -->
+  <div class="row">
+    <label>OS再インストール：</label>
+    <select id="pk_osReinstall" onchange="onPkOsReinstallChange()">
+      <option value="">未選択</option>
+      <option>必要な場合のみ実施願います</option>
+      <option>必要な場合はRHOLD連絡願います</option>
+      <option>実施せず返却願います</option>
+      <option>必ず実施願います</option>
+      <option value="条件付き">※条件付きで実施OK</option>
+    </select>
+  </div>
+  <div class="row hidden" id="pk_osReinstallManualRow">
+    <label>条件（手入力）：</label>
+    <input type="text" id="pk_osReinstallManual" placeholder="未記入の場合ログには出力されません">
+  </div>
+
+  <!-- ★分割：SSD/HDD交換 -->
+  <div class="row">
+    <label>SSD/HDD交換：</label>
+    <select id="pk_hddReplace2">
+      <option value="">未選択</option>
+      <option>必要な場合は交換願います</option>
+      <option>必要な場合はRHOLD連絡願います</option>
+      <option>交換せず返却願います</option>
+    </select>
+  </div>
+
+  <div class="row"><label>HDD/SSD同梱：</label>
+    <select id="pk_hddIncluded"><option value="">未選択</option><option>あり</option><option>なし</option></select>
+  </div>
+  <div class="row"><label>BIOS PW：</label><input type="text" id="pk_biosPw"></div>
+  <div class="row"><label>同梱物：</label><input type="text" id="pk_accessories"></div>
+  <div class="row"><label>ノートPCバッテリー保証状況：</label>
+    <select id="pk_batteryWarranty"><option value="">未選択</option><option>IW</option><option>OOW</option></select>
+  </div>
+  <div class="row"><label>Bitlocker回復キーが必要になった場合：</label>
+    <select id="pk_recoveryKeyAction"><option value="">未選択</option><option>そのまま返却</option><option>OS再ｲﾝｽﾄｰﾙ実施をお願いします</option></select>
+  </div>
+
+  <!-- ドライバーコメント（入力UI） -->
+  <h3>
+    <button class="cat-btn" onclick="toggleList('driverCommentPanel')">ﾄﾞﾗｲﾊﾞｺﾒﾝﾄ必要な際はこちら</button>
+  </h3>
+  <div id="driverCommentPanel" class="checklist">
+    <p class="note" style="color:#c0392b; font-weight:bold;">※改行禁止です</p>
+    <p class="note" style="color:#c0392b; font-weight:bold;">※ドライバーコメント$$の中に、『,』や『/』など、全ての記号の使用NG</p>
+    <p class="note" style="color:#c0392b; font-weight:bold;">※$＝ドルマークはDriverCommentでしか使用してはいけません</p>
+    <div class="row">
+      <label>内容：</label>
+      <select id="driverCommentSelect" onchange="onDriverCommentSelectChange()">
+        <option value="">未選択</option>
+        <option value="事前連絡要">$事前連絡要$</option>
+        <option value="〇時を超える際は要連絡">$〇時を超える際は要連絡$</option>
+        <option value="〇時以降引取り希望">$〇時以降引取り希望$</option>
+        <option value="〇時から△時希望">$〇時から△時希望$</option>
+        <option value="ACアダプタ電源ケーブル同梱">$ACアダプタ電源ケーブル同梱$</option>
+        <option value="〇〇台同時引き取り">$〇〇台同時引き取り$</option>
+        <option value="受付にて〇〇様呼出">$受付にて〇〇様呼出$</option>
+        <option value="不在時は〇〇様宛訪問">$不在時は〇〇様宛訪問$</option>
+        <option value="入り口で内線〇〇に連絡">$入り口で内線〇〇に連絡$</option>
+        <option value="管理人室で立ち入り手続き必要">$管理人室で立ち入り手続き必要$</option>
+        <option value="manual">（手書き）</option>
+      </select>
+    </div>
+    <div class="row hidden" id="driverCommentManualRow">
+      <label>手書き内容：</label>
+      <input type="text" id="driverCommentManual" placeholder="記号・改行は使用不可">
+    </div>
+  </div>
+</div>
+
+<!-- ============ 訪問修理 ============ -->
+<div class="section" id="onsitePanel">
+  <h2>■訪問修理 専用項目</h2>
+  <div class="memo-box">
+    🔹免責事項（お客様への説明事項）<br>
+    ・ノートパソコンではアクシデンタルダメージ保証適用のオンサイト修理はできません。引取修理を提案しましょう。<br>
+    ・パーツが先に到着してエンジニアが伺います。パーツは空けずに保管願います<br>
+    ・近日中に住所変更があった場合、修理がキャンセルされ大幅に遅延します<br>
+    ・ご申告Tagと現地にあるTagに違いがあった場合、修理の再手配が発生します<br>
+    ・修理時、データの保証不可 バックアップを推奨<br>
+    ・他の症状、破損がないか確認<br>
+    ・修理部品は代替品やアップグレード部品になる場合あり<br>
+    ・修理当日に修理場所を用意してください<br>
+    ・パームレスト交換時はシールの張替えにより一部汚れが付く場合があります<br>
+    ・OS再インストール時、工場出荷時のDell製アプリが消えます<br>
+    ・NPRの記載がないパーツは2営業日後に回収。NPR記載パーツはお客様にて破棄
+  </div>
+  <div class="row"><label>訪問希望日：</label><input type="date" id="os_date"></div>
+  <p class="note">※有償修理の場合は記載不要でOK（この注意書きはログに出力されません）</p>
+  <div class="row"><label>希望時間帯：</label>
+    <select id="os_timeband"><option value="">未選択</option><option>午前</option><option>午後</option><option>いつでも</option></select>
+  </div>
+  <h3>訪問先詳細（連絡先は2つ聞いてください）</h3>
+  <div class="row"><label>入電者と修理先は同じ？</label>
+    <button class="toggle-btn" onclick="setToggle('os_same', true, this)">はい</button>
+    <button class="toggle-btn" onclick="setToggle('os_same', false, this)">いいえ</button>
+  </div>
+  <div id="os_same_yes" class="subblock hidden">
+    <div class="row"><label>郵便番号：</label><input type="text" id="os_zip"></div>
+    <div class="row"><label>住所：</label><input type="text" id="os_addr"></div>
+  </div>
+  <div id="os_same_no" class="subblock hidden">
+    <div class="row"><label>郵便番号：</label><input type="text" id="os_zip2"></div>
+    <div class="row"><label>住所：</label><input type="text" id="os_addr2"></div>
+    <div class="row"><label>法人名：</label><input type="text" id="os_company2"></div>
+    <div class="row"><label>担当者：</label><input type="text" id="os_contact2"></div>
+    <div class="row"><label>電話番号1：</label><input type="text" id="os_tel1_2"></div>
+    <div class="row"><label>電話番号2：</label><input type="text" id="os_tel2_2"></div>
+    <div class="row"><label>E-mail：</label><input type="text" id="os_email2"></div>
+  </div>
+  <div class="row"><label>パーツ発送先が同じ？</label>
+    <button class="toggle-btn" onclick="setToggle('os_parts', true, this)">はい</button>
+    <button class="toggle-btn" onclick="setToggle('os_parts', false, this)">いいえ</button>
+  </div>
+  <div id="os_parts_no" class="subblock hidden">
+    <div class="row"><label>郵便番号：</label><input type="text" id="os_p_zip"></div>
+    <div class="row"><label>住所：</label><input type="text" id="os_p_addr"></div>
+    <div class="row"><label>法人名：</label><input type="text" id="os_p_company"></div>
+    <div class="row"><label>担当者：</label><input type="text" id="os_p_contact"></div>
+    <div class="row"><label>電話番号1：</label><input type="text" id="os_p_tel1"></div>
+    <div class="row"><label>電話番号2：</label><input type="text" id="os_p_tel2"></div>
+    <div class="row"><label>E-mail：</label><input type="text" id="os_p_email"></div>
+  </div>
+  <h3>🛠 修理オプション</h3>
+  <div class="row"><label>温度感：</label>
+    <select id="os_heat"><option value="">未選択</option><option>C</option><option>W</option><option>H</option></select>
+  </div>
+  <div class="row"><label>温度感が高い理由：</label>
+    <select id="os_heatReason"><option value="">未選択</option><option>複数回</option><option>購入当初の問題</option><option>DELLのミス</option><option>遅延</option><option>顧客気質</option></select>
+  </div>
+  <div class="row"><label>手配パーツ：</label><input type="text" id="os_dispatchParts"></div>
+  <div class="row"><label>PPID：</label><input type="text" id="os_ppid"></div>
+  <div class="row"><label>HDD/SSD交換/OSインストール可否：</label>
+    <select id="os_hddReplace" onchange="onOsHddChange()">
+      <option value="">未選択</option><option>不可</option><option>了承済</option><option>TSへSEコールください</option>
+    </select>
+  </div>
+  <div class="row hidden" id="os_osReinstallRow">
+    <label>SSD/HDD交換後OS再インストール：</label>
+    <select id="os_osReinstall"><option value="">未選択</option><option>お客様で実施</option><option>USBメディア作成済</option><option>不要</option><option>TSへSEコール</option></select>
+  </div>
+  <div class="row"><label>BitLockerKeyは確認可能か：</label>
+    <select id="os_bitlockerCheckable"><option value="">未選択</option><option>はい</option><option>いいえ</option></select>
+  </div>
+  <div class="row"><label>BitLocker回復キー現地で確認：</label>
+    <select id="os_bitlockerOnsiteCheck"><option value="">未選択</option><option>了承</option><option>不承</option></select>
+  </div>
+  <div class="row"><label>BitLockerKey発生時の対応方法：</label>
+    <select id="os_bitlockerAction"><option value="">未選択</option><option>お客様にて解除</option><option>お客様にご確認ください</option><option>TSへSEコールください</option></select>
+  </div>
+
+  <!-- 同時対応複数台？ -->
+  <div class="row"><label>同時対応複数台？</label>
+    <button class="toggle-btn" onclick="setToggle('os_multiUnit', true, this)">はい</button>
+    <button class="toggle-btn" onclick="setToggle('os_multiUnit', false, this)">いいえ</button>
+  </div>
+  <div id="os_multiUnit_yes" class="subblock hidden">
+    <div class="row">
+      <label>台数：</label>
+      <select id="os_multiUnitCount" onchange="onMultiUnitCountChange()">
+        <option value="">未選択</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+      </select>
+      <span class="note">※それ以上は手書き</span>
+    </div>
+    <div id="os_multiUnitTagContainer"></div>
+  </div>
+</div>
+
+<!-- ============ パーツ発送修理 ============ -->
+<div class="section" id="partsPanel">
+  <h2>■パーツ発送修理 専用項目</h2>
+  <div class="memo-box">
+    🔹免責事項（お客様への説明事項）<br>
+    ・他の症状、破損がないか確認<br>
+    ・作業時のデータ保証不可 バックアップを推奨<br>
+    ・近日中に住所変更があった場合、修理がキャンセルされ大幅に遅延します<br>
+    ・修理部品は代替品やアップグレード部品になる場合あり<br>
+    ・お客様ご自身で修理していただきます（不承の場合は他の修理方法を提案）<br>
+    ・最短日程でパーツ手配　在庫状況によって到着日が変動します<br>
+    ・NPRの記載がないパーツは2営業日後に回収。NPR記載パーツはお客様にて破棄<br>
+    ・SSD/HDD交換時はOS再インストールが必要。Dell製アプリも削除されています
+  </div>
+  <h3>修理先詳細（連絡先は2つ聞いてください）</h3>
+  <div class="row"><label>入電者と修理先は同じ？</label>
+    <button class="toggle-btn" onclick="setToggle('ps_same', true, this)">はい</button>
+    <button class="toggle-btn" onclick="setToggle('ps_same', false, this)">いいえ</button>
+  </div>
+  <div id="ps_same_yes" class="subblock hidden">
+    <div class="row"><label>郵便番号：</label><input type="text" id="ps_zip"></div>
+    <div class="row"><label>住所：</label><input type="text" id="ps_addr"></div>
+  </div>
+  <div id="ps_same_no" class="subblock hidden">
+    <div class="row"><label>郵便番号：</label><input type="text" id="ps_zip2"></div>
+    <div class="row"><label>住所：</label><input type="text" id="ps_addr2"></div>
+    <div class="row"><label>法人名：</label><input type="text" id="ps_company2"></div>
+    <div class="row"><label>担当者：</label><input type="text" id="ps_contact2"></div>
+    <div class="row"><label>電話番号1：</label><input type="text" id="ps_tel1_2"></div>
+    <div class="row"><label>電話番号2：</label><input type="text" id="ps_tel2_2"></div>
+    <div class="row"><label>E-mail：</label><input type="text" id="ps_email2"></div>
+  </div>
+  <div class="row"><label>パーツ回収先は同じ？</label>
+    <button class="toggle-btn" onclick="setToggle('ps_collect', true, this)">はい</button>
+    <button class="toggle-btn" onclick="setToggle('ps_collect', false, this)">いいえ</button>
+  </div>
+  <div id="ps_collect_no" class="subblock hidden">
+    <div class="row"><label>郵便番号：</label><input type="text" id="ps_c_zip"></div>
+    <div class="row"><label>住所：</label><input type="text" id="ps_c_addr"></div>
+    <div class="row"><label>法人名：</label><input type="text" id="ps_c_company"></div>
+    <div class="row"><label>担当者：</label><input type="text" id="ps_c_contact"></div>
+    <div class="row"><label>電話番号1：</label><input type="text" id="ps_c_tel1"></div>
+    <div class="row"><label>電話番号2：</label><input type="text" id="ps_c_tel2"></div>
+    <div class="row"><label>E-mail：</label><input type="text" id="ps_c_email"></div>
+  </div>
+  <h3>🛠 修理オプション</h3>
+  <div class="row"><label>手配パーツ：</label><input type="text" id="ps_dispatchParts"></div>
+  <div class="row"><label>PPID：</label><input type="text" id="ps_ppid"></div>
+  <div class="row"><label><input type="checkbox" id="ps_monitorEnable" onchange="toggleMonitor()" style="width:auto;"> 📺モニター発送あり</label></div>
+  <div id="ps_monitorBlock" class="subblock hidden">
+    <p class="note">・モニターのデザインが変わる場合があります／代替品でインチ数が変わる場合があります／同梱パーツは過不足なく返却してください（※この3点はログ出力しません）</p>
+    <div class="row"><label>モニタエリアマップ：</label><input type="text" id="ps_m_areaMap"></div>
+    <div class="row"><label>使用している映像端子：</label>
+      <select id="ps_m_videoPort"><option value="">未選択</option><option>Display Port</option><option>HDMI</option><option>TYPE-C</option><option>VGA</option></select>
+    </div>
+    <div class="row"><label>TAG#有無：</label><select id="ps_m_tag"><option value="">未選択</option><option>有</option><option>無</option></select></div>
+    <div class="row"><label>オーダー番号有無：</label><select id="ps_m_order"><option value="">未選択</option><option>有</option><option>無</option></select></div>
+    <div class="row"><label>DELL PCと利用か：</label><select id="ps_m_dellpc"><option value="">未選択</option><option>はい</option><option>いいえ</option></select></div>
+    <div class="row"><label>写真提供：</label><select id="ps_m_photo"><option value="">未選択</option><option>有</option><option>無</option></select></div>
+  </div>
+</div>
+
+<!-- ============ JDD専用項目 ============ -->
+<div class="section" id="jddPanel">
+  <h2>■JDD（診断サービス）専用項目</h2>
+  <div class="row"><label>作成者：</label><input type="text" id="jdd_creatorName"></div>
+
+  <h3>集荷先詳細（連絡先は2つ聞いてください）</h3>
+  <div class="row"><label>入電者と修理先は同じ？</label>
+    <button class="toggle-btn" onclick="setToggle('jdd_same', true, this)">はい</button>
+    <button class="toggle-btn" onclick="setToggle('jdd_same', false, this)">いいえ</button>
+  </div>
+  <div id="jdd_same_yes" class="subblock hidden">
+    <div class="row"><label>郵便番号：</label><input type="text" id="jdd_zip"></div>
+    <div class="row"><label>住所：</label><input type="text" id="jdd_addr"></div>
+  </div>
+  <div id="jdd_same_no" class="subblock hidden">
+    <div class="row"><label>郵便番号：</label><input type="text" id="jdd_zip2"></div>
+    <div class="row"><label>住所：</label><input type="text" id="jdd_addr2"></div>
+    <div class="row"><label>法人名：</label><input type="text" id="jdd_company2"></div>
+    <div class="row"><label>担当者：</label><input type="text" id="jdd_contact2"></div>
+    <div class="row"><label>電話番号1：</label><input type="text" id="jdd_tel1_2"></div>
+    <div class="row"><label>電話番号2：</label><input type="text" id="jdd_tel2_2"></div>
+    <div class="row"><label>E-mail：</label><input type="text" id="jdd_email2"></div>
+  </div>
+
+  <h3>🛠 修理オプション</h3>
+  <div class="row"><label>現象未再現時の対応：</label>
+    <select id="jdd_notReproduced">
+      <option value="">未選択</option>
+      <option>現象未再現時はそのまま返却ください</option>
+      <option>現象未再現時はTSへRHOLD連絡をお願いします</option>
+      <option>現象未再現時は～時間の高負荷エージングテスト、複数回のコールドブートを実施いただき問題ないことを確認のうえ返却願います</option>
+    </select>
+  </div>
+  <div class="row"><label>HDD/SSD交換/OSインストール：</label>
+    <select id="jdd_hddReplace"><option value="">未選択</option><option>不可</option><option>了承</option><option>TSへRHOLD連絡をお願いします</option></select>
+  </div>
+  <div class="row"><label>HDD/SSD同梱：</label>
+    <select id="jdd_hddIncluded"><option value="">未選択</option><option>あり</option><option>なし</option></select>
+  </div>
+  <div class="row"><label>BIOS PW：</label><input type="text" id="jdd_biosPw"></div>
+  <div class="row"><label>同梱物：</label><input type="text" id="jdd_accessories"></div>
+  <div class="row"><label>ノートPCバッテリー保証状況：</label>
+    <select id="jdd_batteryWarranty"><option value="">未選択</option><option>IW</option><option>OOW</option></select>
+  </div>
+  <div class="row"><label>BitLockerKey確認可否：</label>
+    <select id="jdd_bitlockerCheck"><option value="">未選択</option><option>Yes</option><option>No</option></select>
+  </div>
+  <div class="row"><label>回復キーが必要になった場合：</label>
+    <select id="jdd_recoveryKeyAction"><option value="">未選択</option><option>そのまま返却</option><option>OS再ｲﾝｽﾄｰﾙ実施をお願いします</option></select>
+  </div>
+</div>
+
+<!-- ============ L2承認 ============ -->
+<div class="section" id="l2Section">
+  <h2>■L2承認</h2>
+  <div class="row"><label>L2承認は必要ですか：</label>
+    <button class="toggle-btn" onclick="setToggle('l2_required', true, this)">はい</button>
+    <button class="toggle-btn" onclick="setToggle('l2_required', false, this)">いいえ</button>
+  </div>
+  <div id="l2_required_yes" class="subblock hidden">
+    <div class="row"><label>承認したL2の名前：</label><input type="text" id="l2_approverName"></div>
+    <div class="row"><label>ESCした内容：</label><input type="text" id="l2_escContent"></div>
+    <div class="row"><label>L2承認必要な理由：</label>
+      <label style="font-weight:normal;"><input type="checkbox" id="l2_reason_repair" onchange="toggleL2Sub('repair')" style="width:auto;"> 再修理</label>
+      <label style="font-weight:normal;"><input type="checkbox" id="l2_reason_ad" onchange="toggleL2Sub('ad')" style="width:auto;"> ｱｸｼﾃﾞﾝﾀﾙﾀﾞﾒｰｼﾞ適用</label>
+      <label style="font-weight:normal;"><input type="checkbox" id="l2_reason_b2d" onchange="toggleL2Sub('b2d')" style="width:auto;"> B2D</label>
+    </div>
+    <div id="l2_repair_block" class="subblock hidden">
+      <h4>☆再修理の詳細</h4>
+      <div class="row"><label>このDPSは再修理か：</label><select id="l2r_isRepeat"><option value="">未選択</option><option>はい（無償修理のみカウント）</option><option>いいえ</option></select></div>
+      <div class="row"><label>同一Case(SR)内、何回目の修理か：</label><select id="l2r_count"><option value="">未選択</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6以上</option></select></div>
+      <div class="row"><label>前回修理のWO#：</label><input type="text" id="l2r_prevWO"></div>
+      <div class="row"><label>再修理承認者（L2/TL）：</label><input type="text" id="l2r_approver"></div>
+      <div class="row"><label>前回修理現象/交換パーツ：</label><input type="text" id="l2r_prevDetail"></div>
+    </div>
+    <div id="l2_ad_block" class="subblock hidden">
+      <h4>☆アクシデンタルダメージ 詳細</h4>
+      <div class="row"><label>アクダメを利用しますか：</label><select id="l2ad_use"><option value="">未選択</option><option>はい</option><option>いいえ</option></select></div>
+      <div class="row"><label>影響された機能：</label><input type="text" id="l2ad_function"></div>
+      <div class="row"><label>影響されたパーツ：</label><input type="text" id="l2ad_parts"></div>
+      <div class="row"><label>誰が破損したか：</label><input type="text" id="l2ad_who"></div>
+      <div class="row"><label>破損した経緯：</label><input type="text" id="l2ad_circumstance"></div>
+      <div class="row"><label>破損した日時：</label><input type="date" id="l2ad_date"></div>
+    </div>
+    <div id="l2_b2d_block" class="subblock hidden">
+      <h4>☆B2D 詳細</h4>
+      <div class="row"><label>B2D手配か：</label><select id="l2b_arranged"><option value="">未選択</option><option>はい</option><option>いいえ</option></select></div>
+      <div class="row"><label>B2D手配理由：</label><input type="text" id="l2b_reason"></div>
+      <div class="row"><label>B2D承認者：</label><input type="text" id="l2b_approver"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ クロージング ============ -->
+<button class="green-btn" onclick="showClosing()" style="padding:10px 20px; font-size:1em;">クロージングを作成</button>
+<div class="section" id="closingSection">
+  <h2>■クロージング内容</h2>
+
+  <div class="row">
+    <label>不明点確認：</label>
+    <select id="c_fumeiten" onchange="onManualSelectChange('c_fumeiten','c_fumeiten_manualRow')">
+      <option value="">未選択</option>
+      <option>済</option><option>失念</option>
+      <option>ご案内前にお電話置かれました</option>
+      <option>温度感高く案内できず</option>
+      <option>お急ぎのためアナウンスできず</option>
+      <option value="手入力">手入力</option>
+    </select>
+  </div>
+  <div class="row hidden" id="c_fumeiten_manualRow">
+    <label>不明点確認（手入力）：</label>
+    <input type="text" id="c_fumeiten_manual">
+  </div>
+
+  <div class="row">
+    <label>不明点発生時メール返信依頼有無：</label>
+    <select id="c_mailReply" onchange="onManualSelectChange('c_mailReply','c_mailReply_manualRow')">
+      <option value="">未選択</option>
+      <option>済</option><option>失念</option>
+      <option>ご案内前にお電話置かれました</option>
+      <option>温度感高く案内できず</option>
+      <option>お急ぎのためアナウンスできず</option>
+      <option value="手入力">手入力</option>
+    </select>
+  </div>
+  <div class="row hidden" id="c_mailReply_manualRow">
+    <label>不明点発生時メール返信依頼有無（手入力）：</label>
+    <input type="text" id="c_mailReply_manual">
+  </div>
+
+  <div class="row">
+    <label>対応にご満足いただけているか/不満回収：</label>
+    <select id="c_satisfaction" onchange="onManualSelectChange('c_satisfaction','c_satisfaction_manualRow')">
+      <option value="">未選択</option>
+      <option>済</option><option>失念</option>
+      <option>ご案内前にお電話置かれました</option>
+      <option>温度感高く案内できず</option>
+      <option>お急ぎのためアナウンスできず</option>
+      <option value="手入力">手入力</option>
+    </select>
+  </div>
+  <div class="row hidden" id="c_satisfaction_manualRow">
+    <label>対応にご満足いただけているか/不満回収（手入力）：</label>
+    <input type="text" id="c_satisfaction_manual">
+  </div>
+
+  <div class="row"><label>Heat Check：</label><select id="c_heat"><option value="">未選択</option><option>Cool</option><option>Warm</option><option>Hot</option></select></div>
+
+  <div class="row"><label>次のお客様側の作業内容および予定：</label><textarea id="c_nextAction" style="min-height:60px;"></textarea></div>
+
+  <div class="row"><label>次回フォロー約束日：</label><input type="date" id="c_followDate"></div>
+
+  <div class="row">
+    <label>お客様都合のよい時間：</label>
+    <select id="c_customerTime"></select>
+  </div>
+
+  <div class="row">
+    <label>フォローメール案内：</label>
+    <select id="c_followMail" onchange="onManualSelectChange('c_followMail','c_followMail_manualRow')">
+      <option value="">未選択</option>
+      <option>済</option>
+      <option>ご案内前にお電話置かれました</option>
+      <option>温度感高く案内できず</option>
+      <option>お急ぎのためアナウンスできず</option>
+      <option value="手入力">手入力</option>
+    </select>
+  </div>
+  <div class="row hidden" id="c_followMail_manualRow">
+    <label>フォローメール案内（手入力）：</label>
+    <input type="text" id="c_followMail_manual">
+  </div>
+
+  <div class="row">
+    <label>過去3ヶ月にCase有無：</label>
+    <select id="c_pastCase" onchange="onPastCaseChange()">
+      <option value="">未選択</option>
+      <option>あり</option>
+      <option>なし</option>
+    </select>
+  </div>
+  <div class="row hidden" id="c_pastCaseNumberRow">
+    <label>Case＃：</label>
+    <input type="text" id="c_pastCaseNumber">
+  </div>
+
+  <div class="row"><label>GCC可否（修理時のみ）：</label><select id="c_gcc"><option value="">未選択</option><option>可</option><option>不可（修理後フォロー）</option></select></div>
+
+  <div class="row">
+    <label>WAIT対策確認（修理時のみ）：</label>
+    <select id="c_waitCheck" onchange="onWaitCheckChange()">
+      <option value="">未選択</option>
+      <option value="実施済み">実施済み</option>
+      <option value="未実施">未実施（理由を記載）</option>
+    </select>
+  </div>
+  <div class="row hidden" id="c_waitCheckReasonRow">
+    <label>WAIT対策未実施の理由：</label>
+    <input type="text" id="c_waitCheckReason">
+  </div>
+
+  <div class="row"><label>内部作業を提案したかどうか：</label><select id="c_internalWork"><option value="">未選択</option><option>Yes</option><option>No</option><option>該当なし</option></select></div>
+  <div class="row"><label>ARを提案したかどうか：</label><select id="c_ar"><option value="">未選択</option><option>Yes</option><option>No</option><option>該当なし</option></select></div>
+  <div class="row"><label>内部作業を拒否した理由：</label><input type="text" id="c_refuseReason"></div>
+  <div class="row"><label>修理プロセス免責・期待値設定：</label><select id="c_repairDisclaimer"><option value="">未選択</option><option>はい（お客様納得）</option><option>はい（お客様納得せず）</option><option>いいえ</option></select></div>
+  <div class="row"><label>SW障害可能性・修理不適切の免責：</label><select id="c_swDisclaimer"><option value="">未選択</option><option>はい（お客様納得）</option><option>はい（お客様納得せず）</option><option>いいえ</option></select></div>
+</div>
+
+<!-- ============ 出力 ============ -->
+<button class="output-btn" onclick="generateAll()">ログを出力</button>
+
+<div class="section">
+  <h2>通常ログ</h2>
+  <textarea id="resultNormal" class="result"></textarea>
+  <button class="green-btn" onclick="copyResultText('resultNormal')">コピー</button>
+</div>
+<div class="section" id="noContactArea" style="display:none;">
+  <h2>■修理用No Contact</h2>
+  <textarea id="resultNoContact" class="result"></textarea>
+  <button class="green-btn" onclick="copyResultText('resultNoContact')">コピー</button>
+</div>
+<div class="section" id="woInstructionArea" style="display:none;">
+  <h2>■WOのInstruction→Fieldログ</h2>
+  <textarea id="resultWoInstruction" class="result"></textarea>
+  <button class="green-btn" onclick="copyResultText('resultWoInstruction')">コピー</button>
+</div>
+
+<script>
+/* ================= 症状チェックリスト ================= */
+const hwItems = ["No Power","No POST","No Video","No Boot","Hard Drive Issue","Memory Issue","Optical Drive Issue","System Fan Issue","Thermal Issue","Audio Issue","Video Issue","Webcam Issue","I/O Ports (USB / Type-C / HDMI / LAN)","AC Adapter / Power Cord Issue","Battery Issue","Keyboard Issue","Touchpad Issue","Mouse Issue","External Device Issue","Hinge Issue","3rd Party Hardware","AD:","Other Hardware"];
+const swItems = ["Network Issue","Blue Screen Issue","Shutdown / Restart Issue","System Freeze","Microsoft Office","Operating System","Applications","Games","3rd Party Software","BIOS Password","Master Password","Other Software"];
+const otherItems = [
+  {label:"Warranty Request", note:"保守に関するお問い合わせ"},
+  {label:"Specification Inquiry", note:"仕様確認"},
+  {label:"Not at Machine", note:"PCが手元にないお客様からの入電"},
+  {label:"Non-Technical Request", note:"非技術的なお問い合わせ"},
+  {label:"Paid Service", note:"OOW案件"},
+  {label:"Diff Add:", note:"別住所対応"}
+];
+function buildCheckbox(id, text, extraInput) {
+  const uid = id + "_" + text.replace(/[^a-zA-Z0-9]/g,"");
+  let html = `<label><input type="checkbox" class="symp-check" data-cat="${id}" value="${text}" id="${uid}" onchange="toggleAdInput(this)" style="width:auto;"> ${text}`;
+  if (extraInput) html += ` <input type="text" class="adInput" id="${uid}_ad" placeholder="詳細を入力">`;
+  html += `</label>`;
+  return html;
+}
+function renderLists() {
+  document.getElementById("hwList").innerHTML = hwItems.map(i=>buildCheckbox("hw", i, i==="AD:")).join("");
+  document.getElementById("swList").innerHTML = swItems.map(i=>buildCheckbox("sw", i, false)).join("");
+  document.getElementById("otherList").innerHTML = otherItems.map(o=>{
+    let h = buildCheckbox("other", o.label, o.label==="Diff Add:");
+    return h.replace("</label>", ` <span class="note">(${o.note})</span></label>`);
+  }).join("");
+}
+renderLists();
+function toggleList(id){ document.getElementById(id).classList.toggle("show"); }
+function toggleAdInput(cb){ const el=document.getElementById(cb.id+"_ad"); if(el) el.style.display=cb.checked?"inline-block":"none"; }
+
+(function fillCustomerTimeSelect(){
+  const sel = document.getElementById("c_customerTime");
+  sel.innerHTML = '<option value="">未選択</option>';
+  ["指定なし","9-18時","9-12時","13-18時","18-21時"].forEach(v=>{
+    const o=document.createElement("option"); o.value=o.text=v; sel.appendChild(o);
+  });
+  let h=9,m=10;
+  while(!(h===21 && m===0)){
+    let o=document.createElement("option");
+    o.value=o.text=`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+    sel.appendChild(o);
+    m+=10; if(m>=60){m-=60;h++;}
+  }
+})();
+
+function showClosing(){ document.getElementById("closingSection").style.display="block"; }
+function val(id){ const e=document.getElementById(id); return e? e.value.trim() : ""; }
+function checked(id){ const e=document.getElementById(id); return e? e.checked : false; }
+function addIfNotEmpty(arr,label,value){ if(value) arr.push(`・${label}：${value}`); }
+function addPlainLine(arr,label,value){ if(value) arr.push(`${label}：${value}`); }
+function addCLine(arr,label,value){ if(value) arr.push(`C:${label}：${value}`); }
+function addAlways(arr,label,value){ arr.push(`・${label}：${value || '未選択'}`); }
+
+function onManualSelectChange(selectId, manualRowId){
+  const v = val(selectId);
+  document.getElementById(manualRowId).classList.toggle('hidden', v !== '手入力');
+}
+function getSelectOrManualValue(selectId, manualId){
+  const v = val(selectId);
+  if(v === '手入力') return val(manualId);
+  return v;
+}
+
+function onPastCaseChange(){
+  const v = val('c_pastCase');
+  document.getElementById('c_pastCaseNumberRow').classList.toggle('hidden', v !== 'あり');
+}
+function getPastCaseOutputValue(){
+  const v = val('c_pastCase');
+  if(v === 'あり'){
+    const num = val('c_pastCaseNumber');
+    return `あり Case＃${num}`;
+  } else if(v === 'なし'){
+    return 'なし';
+  }
+  return '';
+}
+
+function onWaitCheckChange(){
+  const v = val('c_waitCheck');
+  const reasonRow = document.getElementById('c_waitCheckReasonRow');
+  if(v === '未実施'){
+    reasonRow.classList.remove('hidden');
+  } else {
+    reasonRow.classList.add('hidden');
+    document.getElementById('c_waitCheckReason').value = '';
+  }
+}
+function getWaitCheckOutputValue(){
+  const v = val('c_waitCheck');
+  if(v === '未実施'){
+    const reason = val('c_waitCheckReason');
+    return reason ? `未実施（${reason}）` : '未実施';
+  }
+  return v;
+}
+
+let contactMethodValue = "";
+function setContactMethod(value, btnEl){
+  contactMethodValue = value;
+  const parent = btnEl.parentElement;
+  parent.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+  btnEl.classList.add('active');
+}
+
+function onDiagChange(){
+  const v = val('diagResult');
+  document.getElementById('diagErrorRow').classList.toggle('hidden', v!=='Fail');
+  document.getElementById('diagVdRow').classList.toggle('hidden', v!=='Fail');
+  document.getElementById('diagNARow').classList.toggle('hidden', v!=='NotApplicable');
+}
+function diagSummaryText(){
+  const d = val('diagResult');
+  if(d==='Pass') return 'Pass';
+  if(d==='Fail') return `Fail（Error Code: ${val('diagErrorCode')}, Validation Code: ${val('diagVdCode')}）`;
+  if(d==='NotApplicable') return `NotApplicable（Reason: ${val('diagNAReason')}）`;
+  return '';
+}
+function buildDiagHealthBlock(){
+  const d = val('diagResult');
+  if(!d) return [];
+  let lines=[];
+  if(d==='Pass'){
+    lines.push('**Health Check:** ePSA Result=Pass');
+  } else if(d==='Fail'){
+    lines.push('**Health Check:** ePSA Result=Fail');
+    lines.push(`Error Code: ${val('diagErrorCode')}`);
+    lines.push(`Validation Code: ${val('diagVdCode')}`);
+  } else if(d==='NotApplicable'){
+    lines.push('**Health Check:** ePSA Result=NotApplicable');
+    lines.push(`Reason: ${val('diagNAReason')}`);
+  }
+  lines.push('NOI: Confirm No Others Issues.');
+  return lines;
+}
+
+let currentRepairType = 'none';
+function setRepairType(type){
+  currentRepairType = type;
+  ['none','pickup','onsite','parts','jdd'].forEach(t=>{
+    const btn = document.getElementById('btn_'+t);
+    if(btn) btn.classList.toggle('active', t===type);
+  });
+  document.getElementById('repairCommon').style.display = (type==='none' || type==='jdd')? 'none':'block';
+  document.getElementById('pickupPanel').style.display = (type==='pickup')? 'block':'none';
+  document.getElementById('onsitePanel').style.display = (type==='onsite')? 'block':'none';
+  document.getElementById('partsPanel').style.display = (type==='parts')? 'block':'none';
+  document.getElementById('jddPanel').style.display = (type==='jdd')? 'block':'none';
+  document.getElementById('l2Section').style.display = (type==='none' || type==='jdd')? 'none':'block';
+
+  const dispatchInput = document.getElementById('paid_dispatchParts');
+  const jddNote = document.getElementById('jddDispatchNote');
+  if(type === 'jdd'){
+    dispatchInput.disabled = true;
+    dispatchInput.value = '';
+    jddNote.classList.remove('hidden');
+  } else {
+    dispatchInput.disabled = false;
+    jddNote.classList.add('hidden');
+  }
+
+  if(type === 'jdd'){
+    const yesBtn = document.getElementById('paidRepair_yesBtn');
+    if(yesBtn) setToggle('paidRepair', true, yesBtn);
+  }
+
+  updatePkNotReproducedDisabled();
+}
+function onWoMethodChange(){ document.getElementById('woReasonRow').style.display = (val('woMethod')==='1')?'none':'flex'; }
+function onWoReasonChange(){ document.getElementById('woReasonManual').style.display = (val('woReason')==='manual')?'inline-block':'none'; }
+
+function onOsHddChange(){
+  const v = val('os_hddReplace');
+  const row = document.getElementById('os_osReinstallRow');
+  if(v === '' || v === '不可' || v === 'TSへSEコールください'){
+    row.classList.add('hidden');
+    document.getElementById('os_osReinstall').value = '';
+  } else {
+    row.classList.remove('hidden');
+  }
+}
+function toggleMonitor(){ document.getElementById('ps_monitorBlock').classList.toggle('hidden', !checked('ps_monitorEnable')); }
+
+function onDriverCommentSelectChange(){
+  const v = val('driverCommentSelect');
+  document.getElementById('driverCommentManualRow').classList.toggle('hidden', v!=='manual');
+}
+
+function onMultiUnitCountChange(){
+  const count = parseInt(val('os_multiUnitCount')) || 0;
+  const container = document.getElementById('os_multiUnitTagContainer');
+  let html = '';
+  for(let i=1;i<=count;i++){
+    html += `<div class="row"><label>TAG${i}：</label><input type="text" id="os_multiUnitTag_${i}"></div>`;
+  }
+  container.innerHTML = html;
+}
+
+/* ★新規：OS再インストールの条件付き手入力の表示切替 */
+function onPkOsReinstallChange(){
+  const v = val('pk_osReinstall');
+  document.getElementById('pk_osReinstallManualRow').classList.toggle('hidden', v !== '条件付き');
+}
+
+function updatePkNotReproducedDisabled(){
+  const isPaid = toggleState['paidRepair'] === true;
+
+  const pkSel = document.getElementById('pk_notReproduced');
+  if(pkSel){
+    const shouldDisablePk = (currentRepairType === 'pickup' && isPaid);
+    if(shouldDisablePk){
+      pkSel.disabled = true;
+      pkSel.value = '';
+    } else {
+      pkSel.disabled = false;
+    }
+  }
+
+  const jddSel = document.getElementById('jdd_notReproduced');
+  if(jddSel){
+    const shouldDisableJdd = (currentRepairType === 'jdd');
+    if(shouldDisableJdd){
+      jddSel.disabled = true;
+      jddSel.value = '';
+    } else {
+      jddSel.disabled = false;
+    }
+  }
+}
+
+const toggleState = {};
+function setToggle(name, value, btnEl){
+  toggleState[name] = value;
+  const parent = btnEl.parentElement;
+  parent.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+  btnEl.classList.add('active');
+  const yesBlock = document.getElementById(name+'_yes');
+  const noBlock = document.getElementById(name+'_no');
+  if(yesBlock) yesBlock.classList.toggle('hidden', !value);
+  if(noBlock) noBlock.classList.toggle('hidden', value);
+  if(name==='paidRepair'){
+    document.getElementById('paidRepairPanel').style.display = value ? 'block' : 'none';
+    updatePkNotReproducedDisabled();
+  }
+}
+function toggleL2Sub(type){ document.getElementById('l2_'+type+'_block').classList.toggle('hidden', !checked('l2_reason_'+type)); }
+
+function getSelectedSymptomsArray(){
+  const checks = document.querySelectorAll(".symp-check:checked");
+  let result=[];
+  checks.forEach(c=>{
+    let v=c.value;
+    if(v==="AD:"||v==="Diff Add:"){
+      const ad=document.getElementById(c.id+"_ad");
+      v = v + (ad? ad.value.trim():"");
+    }
+    result.push(v);
+  });
+  return result;
+}
+/* ★変更：「現象：」を「■現象：」に変更 */
+function buildSymptomLines(){
+  const direct = val('symptomDirect');
+  const selectedArr = getSelectedSymptomsArray();
+  let lines=[];
+  if(direct){
+    lines.push(`■現象：${direct}`);
+    if(selectedArr.length>0) lines.push(selectedArr.join(" / "));
+  } else {
+    lines.push(`■現象：${selectedArr.join(" / ")}`);
+  }
+  return lines;
+}
+function getSymptomTextForRepairLogs(){
+  const direct = val('symptomDirect');
+  const selectedArr = getSelectedSymptomsArray();
+  if(direct){
+    return direct;
+  }
+  return selectedArr.join(" / ");
+}
+function getSymptomText(){
+  const direct = val('symptomDirect');
+  const selectedArr = getSelectedSymptomsArray();
+  if(direct){
+    return selectedArr.length>0 ? `${direct} / ${selectedArr.join(" / ")}` : direct;
+  }
+  return selectedArr.join(" / ");
+}
+
+function addressBlockText(prefix, label){
+  let lines=[];
+  const same = toggleState[prefix+'_same'];
+  if(same===true){
+    lines.push(`【${label}】(入電者と同一)`);
+    addIfNotEmpty(lines,"郵便番号", val(prefix+'_zip'));
+    addIfNotEmpty(lines,"住所", val(prefix+'_addr'));
+  } else if(same===false){
+    lines.push(`【${label}】(入電者と異なる)`);
+    addIfNotEmpty(lines,"郵便番号", val(prefix+'_zip2'));
+    addIfNotEmpty(lines,"住所", val(prefix+'_addr2'));
+    addIfNotEmpty(lines,"法人名", val(prefix+'_company2'));
+    addIfNotEmpty(lines,"担当者", val(prefix+'_contact2'));
+    addIfNotEmpty(lines,"電話番号1", val(prefix+'_tel1_2'));
+    addIfNotEmpty(lines,"電話番号2", val(prefix+'_tel2_2'));
+    addIfNotEmpty(lines,"E-mail", val(prefix+'_email2'));
+  }
+  return lines;
+}
+function secondaryAddressBlockText(toggleKey, idPrefix, label){
+  let lines=[];
+  const same = toggleState[toggleKey];
+  if(same===false){
+    lines.push(`【${label}】(異なる)`);
+    addIfNotEmpty(lines,"郵便番号", val(idPrefix+'_zip'));
+    addIfNotEmpty(lines,"住所", val(idPrefix+'_addr'));
+    addIfNotEmpty(lines,"法人名", val(idPrefix+'_company'));
+    addIfNotEmpty(lines,"担当者", val(idPrefix+'_contact'));
+    addIfNotEmpty(lines,"電話番号1", val(idPrefix+'_tel1'));
+    addIfNotEmpty(lines,"電話番号2", val(idPrefix+'_tel2'));
+    addIfNotEmpty(lines,"E-mail", val(idPrefix+'_email'));
+  } else {
+    lines.push(`【${label}】(修理先と同じ)`);
+  }
+  return lines;
+}
+
+function buildReturnRBlock(){
+  if(!(currentRepairType==='pickup' && toggleState['pk_return']===false)) return [];
+  let lines=[];
+  lines.push('R:返却先は以下にお願いします');
+  lines.push(`R:郵便番号：${val('pk_return_zip')}`);
+  lines.push(`R:住所：${val('pk_return_addr')}`);
+  lines.push(`R:法人名：${val('pk_return_company')}`);
+  lines.push(`R:担当者：${val('pk_return_contact')}`);
+  lines.push(`R:電話番号1：${val('pk_return_tel1')}`);
+  lines.push(`R:電話番号2：${val('pk_return_tel2')}`);
+  lines.push(`R:E-mail：${val('pk_return_email')}`);
+  return lines;
+}
+
+function buildWoLines(){
+  let lines=[];
+  const methodTextMap = {
+    "1":"C:1:DTCから「ﾃﾞｨｽﾊﾟｯﾁの作成」をｸﾘｯｸしてSWO使用",
+    "2":"C:2:DTCから「直接ﾃﾞｨｽﾊﾟｯﾁ」をｸﾘｯｸしてSWO使用",
+    "3":"C:3:SFDCからﾄｸﾞﾙﾎﾞﾀﾝをｸﾘｯｸしてSWO使用",
+    "4":"C:4:SFDCからそのままCreateしてﾏﾆｭｱﾙ作成"
+  };
+  const m = val('woMethod') || "1";
+  lines.push(methodTextMap[m]);
+  if(m!=="1"){
+    const r = val('woReason');
+    if(r==="manual"){
+      const manual = val('woReasonManual');
+      if(manual){ lines.push(`C:理由：${manual}`); lines.push(''); }
+    } else if(r){
+      lines.push(`C:理由:${r}`);
+      lines.push('');
+    }
+  }
+  return lines;
+}
+function getPrefixLine(){
+  if(currentRepairType==='pickup') return '**PWR受付**';
+  if(currentRepairType==='onsite') return '**NBD受付**';
+  if(currentRepairType==='parts') return '**PSO受付**';
+  if(currentRepairType==='jdd') return '**JDD受付**';
+  return '';
+}
+function getPaidPrefixLine(normalPrefix){
+  const map = {
+    '**PWR受付**':'**POR受付**',
+    '**NBD受付**':'**OW5受付**',
+    '**PSO受付**':'**OWP受付**'
+  };
+  return map[normalPrefix] || normalPrefix;
+}
+
+function buildDateTimeLines(){
+  let lines=[];
+  if(currentRepairType==='pickup'){
+    addIfNotEmpty(lines,"引取希望日", val('pk_date'));
+    addIfNotEmpty(lines,"希望時間帯", val('pk_timeband'));
+  } else if(currentRepairType==='onsite'){
+    addIfNotEmpty(lines,"訪問希望日", val('os_date'));
+    addIfNotEmpty(lines,"希望時間帯", val('os_timeband'));
+  }
+  return lines;
+}
+
+function getDriverCommentContent(){
+  const sel = val('driverCommentSelect');
+  if(!sel) return '';
+  let content = sel === 'manual' ? val('driverCommentManual') : sel;
+  if(!content) return '';
+  content = content.replace(/[^\wぁ-んァ-ヶ一-龠々〇ー ]/g, '');
+  return content;
+}
+function buildDriverCommentOutputText(){
+  if(currentRepairType !== 'pickup') return '';
+  const content = getDriverCommentContent();
+  if(!content) return '';
+  return `$${content}$`;
+}
+
+function buildMultiUnitLines(){
+  if(toggleState['os_multiUnit'] !== true) return [];
+  const count = parseInt(val('os_multiUnitCount')) || 0;
+  if(count <= 0) return [];
+  let tags=[];
+  for(let i=1;i<=count;i++){
+    const t = val('os_multiUnitTag_'+i);
+    if(t) tags.push(t);
+  }
+  let lines = [`C:同時対応　${count}TAG/${count}DPS`];
+  if(tags.length>0){
+    lines.push(`C:${tags.join('/')}`);
+  }
+  return lines;
+}
+
+/* ★変更：HDD/SSD交換/OSインストールを分割 */
+function buildPickupLines(){
+  let c=[]; let i=[];
+  const notRepro = val('pk_notReproduced');
+  if(notRepro) i.push(`I:${notRepro}`);
+
+  /* OS再インストール：条件付きの場合は手入力必須、未記入ならログ出力なし */
+  const osReinstall = val('pk_osReinstall');
+  if(osReinstall === '条件付き'){
+    const manual = val('pk_osReinstallManual');
+    if(manual) addCLine(c, "OS再インストール", manual);
+    /* 未記入の場合は何も出力しない */
+  } else {
+    addCLine(c, "OS再インストール", osReinstall);
+  }
+
+  /* SSD/HDD交換 */
+  addCLine(c,"SSD/HDD交換", val('pk_hddReplace2'));
+
+  addCLine(c,"HDD/SSD同梱", val('pk_hddIncluded'));
+  addCLine(c,"BIOS PW", val('pk_biosPw'));
+  addCLine(c,"同梱物", val('pk_accessories'));
+  addCLine(c,"ノートPCバッテリー保証状況", val('pk_batteryWarranty'));
+  addCLine(c,"Bitlocker回復キーが必要になった場合", val('pk_recoveryKeyAction'));
+  return {c, i, internal:[]};
+}
+function buildOnsiteLines(){
+  let c=[]; let i=[]; let internal=[]; let heatLines=[];
+  const heat = val('os_heat');
+  const heatReason = val('os_heatReason');
+  if(heat) heatLines.push(`CT：${heat}`);
+  if(heatReason) heatLines.push(`温度感が高い理由：${heatReason}`);
+
+  const isPaid = toggleState['paidRepair'] === true;
+  if(!isPaid){
+    const dp = val('os_dispatchParts');
+    if(dp) i.push(`I:${dp}`);
+    const ppid = val('os_ppid');
+    if(ppid) i.push(`PPID：${ppid}`);
+  }
+
+  const hddVal = val('os_hddReplace');
+  addCLine(c,"HDD/SSD交換/OSインストール可否", hddVal);
+  if(hddVal && hddVal !== '不可' && hddVal !== 'TSへSEコールください'){
+    const reinstall = val('os_osReinstall');
+    if(reinstall) addCLine(c, "SSD/HDD交換後OS再インストール", reinstall);
+  }
+  addCLine(c,"BitLockerKeyは確認可能か", val('os_bitlockerCheckable'));
+  addCLine(c,"BitLocker回復キー現地で確認", val('os_bitlockerOnsiteCheck'));
+  addCLine(c,"BitLockerKey発生時の対応方法", val('os_bitlockerAction'));
+
+  const multiUnitLines = buildMultiUnitLines();
+  if(multiUnitLines.length>0){
+    c.push('');
+    multiUnitLines.forEach(l=>c.push(l));
+  }
+
+  return {c, i, internal, heatLines};
+}
+function buildPartsLines(){
+  let c=[]; let i=[];
+  const dp = val('ps_dispatchParts');
+  if(dp) i.push(`I:${dp}`);
+  const ppid = val('ps_ppid');
+  if(ppid) i.push(`PPID：${ppid}`);
+
+  if(checked('ps_monitorEnable')){
+    c.push('**Dispatch Commodity||Monitor：**');
+    addIfNotEmpty(c,"モニタエリアマップ", val('ps_m_areaMap'));
+    addIfNotEmpty(c,"使用している映像端子", val('ps_m_videoPort'));
+    addIfNotEmpty(c,"TAG#有無", val('ps_m_tag'));
+    addIfNotEmpty(c,"オーダー番号有無", val('ps_m_order'));
+    addIfNotEmpty(c,"DELL PCと利用か", val('ps_m_dellpc'));
+    addIfNotEmpty(c,"写真提供", val('ps_m_photo'));
+    c.push('・CIDAR：Yes');
+  }
+  return {c, i};
+}
+
+function buildJddLines(){
+  let c=[]; let i=[];
+  c.push('C:法人対応のため診断後手動見積もり対応必要');
+  c.push('C:法人顧客');
+  c.push('');
+
+  const notRepro = val('jdd_notReproduced');
+  if(notRepro) i.push(`I:${notRepro}`);
+  addCLine(c,"HDD/SSD交換/OSインストール", val('jdd_hddReplace'));
+  addCLine(c,"HDD/SSD同梱", val('jdd_hddIncluded'));
+  addCLine(c,"BIOS PW", val('jdd_biosPw'));
+  addCLine(c,"同梱物", val('jdd_accessories'));
+  addCLine(c,"ノートPCバッテリー保証状況", val('jdd_batteryWarranty'));
+  addCLine(c,"BitLockerKey確認可否", val('jdd_bitlockerCheck'));
+  addCLine(c,"回復キーが必要になった場合", val('jdd_recoveryKeyAction'));
+  return {c, i, internal:[]};
+}
+
+function buildADBlock(){
+  if(!checked('l2_reason_ad')) return [];
+  let lines=[];
+  lines.push('**AD(Accident Damage)：**');
+  lines.push('偶発的な理由にて発生可否 : Yes');
+  lines.push('AD保証は2014/12/1より前に購入されたか？：Yes');
+  addPlainLine(lines,"アクダメを利用しますか", val('l2ad_use'));
+  addPlainLine(lines,"影響された機能", val('l2ad_function'));
+  addPlainLine(lines,"影響されたパーツ", val('l2ad_parts'));
+  addPlainLine(lines,"誰が破損したか", val('l2ad_who'));
+  addPlainLine(lines,"破損した経緯", val('l2ad_circumstance'));
+  addPlainLine(lines,"破損した日時", val('l2ad_date'));
+  return lines;
+}
+
+function buildRepairBlock(){
+  if(!checked('l2_reason_repair')) return [];
+  let lines=[];
+  lines.push('**SR DPS3+ and 28Rix5+：**');
+  const cnt = val('l2r_count');
+  if(cnt) lines.push(`SR DPS：${cnt}回目`);
+  const prevWO = val('l2r_prevWO');
+  if(prevWO) lines.push(`前回WO#：${prevWO}`);
+  const prevDetail = val('l2r_prevDetail');
+  if(prevDetail) lines.push(`前回修理時現象/交換パーツ：${prevDetail}`);
+  const approver = val('l2r_approver');
+  if(approver) lines.push(`Approved by：${approver}`);
+  return lines;
+}
+
+function buildInternalLines(typeSpecificInternal){
+  let lines = [];
+  lines.push('■Internal');
+  lines.push('ﾊﾟｰﾂが代替品に変更される可能性､初期構成に戻る可能性があること説明済み｡');
+  lines.push('データ保証不可であることを案内済み。');
+  if(typeSpecificInternal && typeSpecificInternal.length>0) typeSpecificInternal.forEach(l=>lines.push(`・${l}`));
+
+  const l2req = toggleState['l2_required'];
+  if(l2req===true){
+    lines.push('L2承認：はい');
+    addPlainLine(lines,"承認したL2の名前", val('l2_approverName'));
+    addPlainLine(lines,"ESCした内容", val('l2_escContent'));
+
+    if(checked('l2_reason_b2d')){
+      const arranged = val('l2b_arranged');
+      if(arranged === 'はい'){
+        const reason = val('l2b_reason');
+        const approver = val('l2b_approver');
+        lines.push('**B2D Compliance**');
+        if(reason) lines.push(`B2D Reason：${reason}`);
+        if(approver) lines.push(`Approved by：${approver}`);
+      } else if(arranged === 'いいえ'){
+        lines.push('B2D手配か：いいえ');
+      }
+    }
+  } else if(l2req===false){
+    lines.push('L2承認：いいえ');
+  }
+  return lines;
+}
+
+function buildPaidDispatchLines(){
+  if(toggleState['paidRepair'] !== true) return [];
+  if(currentRepairType === 'jdd') return [];
+  const part = val('paid_dispatchParts');
+  if(!part) return [];
+  return [`I:${part}`, '上記パーツは必須交換ください'];
+}
+
+function buildKiriwakeBlock(typeC, typeI){
+  let lines=[];
+  lines.push('切り分け：');
+  const guidance = val('guidanceContent');
+  if(guidance) lines.push(guidance);
+
+  const isPaid = toggleState['paidRepair'] === true;
+  const paidLines = buildPaidDispatchLines();
+
+  if(isPaid && currentRepairType === 'pickup' && paidLines.length>0){
+    paidLines.forEach(l=>lines.push(l));
+    typeI.forEach(l=>lines.push(l));
+  } else {
+    typeI.forEach(l=>lines.push(l));
+    if(paidLines.length>0){
+      lines.push('');
+      paidLines.forEach(l=>lines.push(l));
+    }
+  }
+
+  const healthBlock = buildDiagHealthBlock();
+  if(healthBlock.length>0){
+    lines.push('');
+    healthBlock.forEach(l=>lines.push(l));
+  }
+
+  const adBlock = buildADBlock();
+  if(adBlock.length>0){
+    lines.push('');
+    adBlock.forEach(l=>lines.push(l));
+  }
+
+  const repairBlock = buildRepairBlock();
+  if(repairBlock.length>0){
+    lines.push('');
+    repairBlock.forEach(l=>lines.push(l));
+  }
+
+  if(typeC.length>0){
+    lines.push('');
+    typeC.forEach(l=>lines.push(l));
+  }
+
+  return lines;
+}
+
+const disclaimerTexts = {
+  pickup: ["近日中に住所変更があった場合、修理がキャンセルされ大幅に遅延します","ご申告Tagと入荷されたTagに違いがあった場合、修理の再手配が発生します","修理時、データの保証不可 バックアップを推奨","他の症状、破損がないか確認","周辺機器を取り外し、本体PCのみお渡しください","TSからの指定機器を集荷時に渡してください","通常二週間前後で返却（パーツ状況により前後）","破損や液損の場合、有償修理対応（もしくはAD保証対応）になります","修理部品は代替品やアップグレード部品になる場合あり","OS再インストール時、工場出荷時のDell製アプリが消えます","製品購入時の初期構成（OS等）に変更される場合がございます"],
+  onsite: ["ノートパソコンではアクシデンタルダメージ保証適用のオンサイト修理はできません。引取修理を提案しましょう。","パーツが先に到着してエンジニアが伺います。パーツは空けずに保管願います","近日中に住所変更があった場合、修理がキャンセルされ大幅に遅延します","ご申告Tagと現地にあるTagに違いがあった場合、修理の再手配が発生します","修理時、データの保証不可 バックアップを推奨","他の症状、破損がないか確認","修理部品は代替品やアップグレード部品になる場合あり","修理当日に修理場所を用意してください","パームレスト交換時はシールの張替えにより一部汚れが付く場合があります","OS再インストール時、工場出荷時のDell製アプリが消えます","NPRの記載がないパーツは2営業日後に回収。NPR記載パーツはお客様にて破棄"],
+  parts: ["他の症状、破損がないか確認","作業時のデータ保証不可 バックアップを推奨","近日中に住所変更があった場合、修理がキャンセルされ大幅に遅延します","修理部品は代替品やアップグレード部品になる場合あり","お客様ご自身で修理していただきます（不承の場合は他の修理方法を提案）","最短日程でパーツ手配　在庫状況によって到着日が変動します","NPRの記載がないパーツは2営業日後に回収。NPR記載パーツはお客様にて破棄","SSD/HDD交換時はOS再インストールが必要。Dell製アプリも削除されています"]
+};
+function buildDisclaimerBlock(){
+  let lines=[];
+  lines.push('🔹免責事項：下記確認・説明済');
+  if(disclaimerTexts[currentRepairType]){
+    disclaimerTexts[currentRepairType].forEach(t=>lines.push(`・${t}`));
+  }
+  return lines;
+}
+
+function buildDiffAddressBlock(){
+  if(!(currentRepairType==='onsite' && toggleState['os_parts']===false)) return [];
+  let lines=[];
+  lines.push('別住所対応/');
+  lines.push('■オンサイト先:');
+  lines.push(`顧客名:${val('os_company2')||val('company')}`);
+  lines.push(`担当者:${val('os_contact2')||val('contactName')}`);
+  lines.push(`郵便番号:${val('os_zip')||val('os_zip2')}`);
+  lines.push(`住所:${val('os_addr')||val('os_addr2')}`);
+  lines.push(`TEL:${val('os_tel1_2')||val('tel1')}`);
+  lines.push('■部品配送先:');
+  lines.push(`顧客名:${val('os_p_company')}`);
+  lines.push(`担当者:${val('os_p_contact')}`);
+  lines.push(`郵便番号:${val('os_p_zip')}`);
+  lines.push(`住所:${val('os_p_addr')}`);
+  lines.push(`TEL:${val('os_p_tel1')}`);
+  lines.push('[$$$$$]');
+  lines.push('');
+  return lines;
+}
+
+function buildPaidQuoteBlock(){
+  if(toggleState['paidRepair'] !== true) return [];
+  let lines=[];
+  lines.push('◆ご請求/見積先');
+  lines.push(`会社名：${val('paid_company')}`);
+  lines.push(`名前（フルネーム）：${val('paid_name')}`);
+  lines.push(`住所：${val('paid_address')}`);
+  lines.push(`電話番号：${val('paid_tel')}`);
+  lines.push(`請求先Email：${val('paid_billingEmail')}`);
+  lines.push(`見積送付先Email：${val('paid_quoteEmail')}`);
+  return lines;
+}
+
+/* ★変更：「■問合せ内容：」見出しを削除、「LCD Bist：」を「- LCD Bist：」に変更、貿易コンプライアンス反映 */
+function buildNormalLogText(){
+  let lines=[];
+
+  lines.push('■お客様情報：');
+  lines.push(`・Case＃：${val("caseNumber")}`);
+  lines.push(`・TAG/EXP#：${val("tag")}`);
+  lines.push(`・機種名：${val("model")}`);
+  lines.push(`・保証：${val("warranty")}`);
+  lines.push(`・法人名：${val("company")}`);
+  lines.push(`・担当者名：${val("contactName")}`);
+  lines.push(`・電話番号1：${val("tel1")}`);
+  lines.push(`・電話番号2：${val("tel2")}`);
+  lines.push(`・E-mail：${val("email")}`);
+  lines.push(`・希望連絡方法：${contactMethodValue}`);
+  lines.push('');
+  buildSymptomLines().forEach(l=>lines.push(l));
+  lines.push('');
+  lines.push('◯確認事項◯');
+  lines.push(`- いつから：${val("since")}`);
+  lines.push(`- きっかけ：${val("trigger")}`);
+  lines.push(`- 頻度：${val("frequency")}`);
+  lines.push(`- 発生ﾀｲﾐﾝｸﾞ：${val("timing")}`);
+  lines.push(`- 増設：${val("addon")}`);
+  lines.push(`- Diag：/Validation Code：${diagSummaryText()}`);
+  lines.push(`- LCD Bist：${val("lcdbist")}`);
+  lines.push(`- トラブルシューティング中のデータロスト免責：${val("dataLossDisclaimer")}`);
+  lines.push(`- CRUﾊﾟｰﾂの取り外し案内：${val("cruGuideNormal")}`);
+  const tradeComplianceValue = val('tradeCompliance') || '未確認';
+  lines.push(`- 貿易コンプライアンスについて：${tradeComplianceValue}`);
+  lines.push('- 入電者所在地：日本');
+  lines.push('- パソコンの使用場所：日本');
+  lines.push('');
+  lines.push('■案内(切り分け)内容：');
+  lines.push(val('guidanceContent'));
+
+  const isPaid = toggleState['paidRepair'] === true;
+
+  if(currentRepairType==='pickup'){
+    lines.push('');
+    buildDateTimeLines().forEach(l=>lines.push(l));
+    addressBlockText('pk','集荷先').forEach(l=>lines.push(l));
+    lines.push('');
+    const driverText = buildDriverCommentOutputText();
+    if(driverText){
+      lines.push(driverText);
+      lines.push('');
+    }
+    secondaryAddressBlockText('pk_return','pk_return','返却先').forEach(l=>lines.push(l));
+  } else if(currentRepairType==='onsite'){
+    lines.push('');
+    buildDateTimeLines().forEach(l=>lines.push(l));
+    addressBlockText('os','訪問先').forEach(l=>lines.push(l));
+    lines.push('');
+    secondaryAddressBlockText('os_parts','os_p','パーツ発送先').forEach(l=>lines.push(l));
+  } else if(currentRepairType==='parts'){
+    lines.push('');
+    addressBlockText('ps','修理先').forEach(l=>lines.push(l));
+    lines.push('');
+    secondaryAddressBlockText('ps_collect','ps_c','パーツ回収先').forEach(l=>lines.push(l));
+  } else if(currentRepairType==='jdd'){
+    lines.push('');
+    addressBlockText('jdd','集荷先').forEach(l=>lines.push(l));
+  }
+
+  if(currentRepairType!=='none' && currentRepairType!=='jdd' && !isPaid){
+    lines.push('');
+    buildDisclaimerBlock().forEach(l=>lines.push(l));
+  }
+
+  const closingVisible = document.getElementById("closingSection").style.display === "block";
+  const paidQuoteBlock = buildPaidQuoteBlock();
+
+  if(closingVisible){
+    let closingLines=[];
+    addAlways(closingLines,"不明点確認", getSelectOrManualValue('c_fumeiten','c_fumeiten_manual'));
+    addAlways(closingLines,"不明点発生時メール返信依頼有無", getSelectOrManualValue('c_mailReply','c_mailReply_manual'));
+    addAlways(closingLines,"対応にご満足いただけているか/不満回収", getSelectOrManualValue('c_satisfaction','c_satisfaction_manual'));
+    addAlways(closingLines,"Heat Check", val("c_heat"));
+    addAlways(closingLines,"次のお客様側の作業内容および予定", val("c_nextAction"));
+    addAlways(closingLines,"次回フォロー約束日", val("c_followDate"));
+    addAlways(closingLines,"お客様都合のよい時間", val("c_customerTime"));
+    addAlways(closingLines,"フォローメール案内", getSelectOrManualValue('c_followMail','c_followMail_manual'));
+    addAlways(closingLines,"過去3ヶ月にCase有無", getPastCaseOutputValue());
+
+    addIfNotEmpty(closingLines,"GCC可否（修理時のみ）", val("c_gcc"));
+    addIfNotEmpty(closingLines,"WAIT対策確認（修理時のみ）", getWaitCheckOutputValue());
+    addIfNotEmpty(closingLines,"内部作業を提案したかどうか", val("c_internalWork"));
+    addIfNotEmpty(closingLines,"ARを提案したかどうか", val("c_ar"));
+    addIfNotEmpty(closingLines,"内部作業を拒否した理由", val("c_refuseReason"));
+    addIfNotEmpty(closingLines,"修理プロセス免責・期待値設定", val("c_repairDisclaimer"));
+    addIfNotEmpty(closingLines,"SW障害可能性・修理不適切の免責", val("c_swDisclaimer"));
+
+    if(paidQuoteBlock.length>0){
+      lines.push('');
+      paidQuoteBlock.forEach(l=>lines.push(l));
+    }
+
+    if(closingLines.length>0){
+      lines.push(''); lines.push('■クロージング内容：');
+      closingLines.forEach(l=>lines.push(l));
+    }
+  } else {
+    if(paidQuoteBlock.length>0){
+      lines.push('');
+      paidQuoteBlock.forEach(l=>lines.push(l));
+    }
+  }
+  return lines.join('\n');
+}
+function generateNormalLog(){ document.getElementById('resultNormal').value = buildNormalLogText(); }
+
+function generateRepairLogs(){
+  document.getElementById('noContactArea').style.display='none';
+  document.getElementById('woInstructionArea').style.display='none';
+  if(currentRepairType==='none') return;
+
+  const isPaid = toggleState['paidRepair'] === true;
+  const woLines = (currentRepairType === 'jdd') ? [] : buildWoLines();
+  const normalPrefix = getPrefixLine();
+  const prefixForWO = isPaid ? getPaidPrefixLine(normalPrefix) : normalPrefix;
+  const creator = (currentRepairType === 'jdd') ? val('jdd_creatorName') : val('creatorName');
+  const symptomText = getSymptomTextForRepairLogs();
+
+  let typeC=[], typeI=[], typeInternal=[], heatLines=[];
+  if(currentRepairType==='pickup'){ const r=buildPickupLines(); typeC=r.c; typeI=r.i; typeInternal=r.internal; }
+  else if(currentRepairType==='onsite'){ const r=buildOnsiteLines(); typeC=r.c; typeI=r.i; typeInternal=r.internal; heatLines=r.heatLines; }
+  else if(currentRepairType==='parts'){ const r=buildPartsLines(); typeC=r.c; typeI=r.i; }
+  else if(currentRepairType==='jdd'){ const r=buildJddLines(); typeC=r.c; typeI=r.i; typeInternal=r.internal; }
+
+  const diffAddressBlock = buildDiffAddressBlock();
+  const returnRBlock = buildReturnRBlock();
+  const kiriwake = buildKiriwakeBlock(typeC, typeI);
+
+  /* ★変更：「現象：」を「■現象：」に変更、訪問修理の場合のみ日時情報を機種名の下に出力 */
+  const commonHeader = (prefixToUse)=>{
+    let arr=[];
+    if(returnRBlock.length>0){
+      returnRBlock.forEach(l=>arr.push(l));
+      arr.push('');
+    }
+    arr.push(prefixToUse);
+    arr.push(`作成者：${creator}`);
+    heatLines.forEach(l=>arr.push(l));
+    arr.push('5 Good Line Comments:');
+    if(symptomText) arr.push(`■現象：${symptomText}`);
+    arr.push(`いつから：${val("since")}`);
+    arr.push(`きっかけ：${val("trigger")}`);
+    arr.push(`頻度：${val("frequency")}`);
+    arr.push(`発生ﾀｲﾐﾝｸﾞ：${val("timing")}`);
+    arr.push(`増設：${val("addon")}`);
+    arr.push(`・TAG/EXP#：${val("tag")}`);
+    arr.push(`・機種名：${val("model")}`);
+    if(currentRepairType === 'onsite'){
+      buildDateTimeLines().forEach(l=>arr.push(l));
+    }
+    return arr;
+  };
+
+  if(!isPaid){
+    let noContactLines=[];
+    noContactLines.push(...woLines);
+    if(diffAddressBlock.length>0) noContactLines.push(...diffAddressBlock);
+    noContactLines.push(...commonHeader(normalPrefix));
+    noContactLines.push(...kiriwake);
+    noContactLines.push('');
+    noContactLines.push(...buildInternalLines(typeInternal));
+    document.getElementById('resultNoContact').value = noContactLines.join('\n');
+    document.getElementById('noContactArea').style.display='block';
+  }
+
+  let woInstructionLines=[];
+  if(diffAddressBlock.length>0) woInstructionLines.push(...diffAddressBlock);
+  woInstructionLines.push(...commonHeader(prefixForWO));
+  woInstructionLines.push(...kiriwake);
+
+  document.getElementById('resultWoInstruction').value = woInstructionLines.join('\n');
+  document.getElementById('woInstructionArea').style.display='block';
+}
+
+function generateAll(){
+  generateNormalLog();
+  generateRepairLogs();
+}
+
+/* ================= コピー機能 ================= */
+function copyResultText(id){
+  const ta = document.getElementById(id);
+  ta.select();
+  document.execCommand('copy');
+  alert('コピーしました');
+}
+
+/* ================= CTEテンプレ生成 ================= */
+function buildCteText(){
+  const symptomText = getSymptomText();
+  const ePSAText = (()=>{
+    const d = val('diagResult');
+    if(d==='Pass') return 'Pass';
+    if(d==='Fail') return `Fail（Error Code: ${val('diagErrorCode')}, Validation Code: ${val('diagVdCode')}）`;
+    if(d==='NotApplicable') return `NA（Reason: ${val('diagNAReason')}）`;
+    return '';
+  })();
+
+  let lines=[];
+  lines.push(`■Tag#:${val('tag')}`);
+  lines.push(`■機種名:${val('model')}`);
+  lines.push(`■現象:${symptomText}`);
+  lines.push(`■Flash Code/Beep Code/Stop Code:`);
+  lines.push(`※Error MSG:`);
+  lines.push(`■何を聞きたいか？ESCの背景/質問の意図（具体的/簡潔に）:`);
+  lines.push(`■Knowledge検索したか？: Yes / No`);
+  lines.push(`※LKB#:`);
+  lines.push('**7つの質問**');
+  lines.push(`■いつから:${val('since')}`);
+  lines.push(`■きっかけ/心当たり:${val('trigger')}`);
+  lines.push(`■頻度:${val('frequency')}`);
+  lines.push(`■タイミング:${val('timing')}`);
+  lines.push(`■増設機器:${val('addon')}`);
+  lines.push(`■ePSA:${ePSAText}`);
+  lines.push(`■実施した切り分け内容/その結果:`);
+  return lines.join('\n');
+}
+
+/* ================= SEコールテンプレ（静的） ================= */
+function buildSeCallText(){
+  let lines=[];
+  lines.push('☆SE call☆');
+  lines.push('※DTCは 「DSP エスカレーション」');
+  lines.push('LKB：000046703');
+  lines.push('■SE call');
+  lines.push('■WO# ');
+  lines.push('■WO作成担当名:　さん');
+  lines.push('所属DSP/担当者：');
+  lines.push('電話番号：');
+  lines.push('Case#');
+  lines.push('TAG/EXP#');
+  lines.push('機種名：');
+  lines.push('保証：');
+  lines.push('（無償/有償）：');
+  lines.push('修理先会社名：');
+  lines.push('■エンジニアからの問い合わせ内容');
+  lines.push('元現象：');
+  lines.push('交換パーツ：');
+  lines.push('被疑パーツ：');
+  lines.push('PPID：※DOAの場合聞けたら');
+  lines.push('■TSからの回答');
+  return lines.join('\n');
+}
+
+/* ================= 転送テンプレ（静的） ================= */
+function buildTransferText(){
+  let lines=[];
+  lines.push('☆転送☆');
+  lines.push('※DTCは 「転送 コール」');
+  lines.push('LKB：000047394');
+  lines.push('・TAG/EXP#');
+  lines.push('・機種名：');
+  lines.push('・保証：');
+  lines.push('・法人名：');
+  lines.push('・担当者名：');
+  lines.push('・電話番号：');
+  lines.push('お問い合わせ内容：');
+  return lines.join('\n');
+}
+
+/* ================= 編集可能なポップアップ ================= */
+function openEditablePopup(heading, generatorFnName, fontSize){
+  const initial = window[generatorFnName]();
+  const fs = fontSize || '0.85em';
+  const w = window.open('', '_blank', 'width=560,height=560');
+  w.document.write(`
+    <!DOCTYPE html>
+    <html lang="ja"><head><meta charset="UTF-8"><title>${heading}</title>
+    <style>
+      body{font-family:"Meiryo",sans-serif; margin:8px;}
+      h3{font-size:1em; margin:4px 0;}
+      textarea{width:100%; height:70vh; font-family:monospace; font-size:${fs}; padding:6px; border-radius:6px; border:1px solid #ccc;}
+      button{padding:6px 12px; margin-bottom:6px; margin-right:6px; border:none; border-radius:6px; cursor:pointer; font-size:0.85em;}
+      .refresh{background:#2b6fb3; color:#fff;}
+      .copy{background:#2e8b3e; color:#fff;}
+    </style>
+    </head>
+    <body>
+      <h3>${heading}</h3>
+      <button class="refresh" id="refreshBtn">再取得</button>
+      <button class="copy" id="copyBtn">コピー</button>
+      <textarea id="popupText">${escapeHtml(initial)}</textarea>
+      <script>
+        document.getElementById('refreshBtn').onclick = function(){
+          if(confirm('現在の編集内容を破棄して再取得します。よろしいですか？')){
+            document.getElementById('popupText').value = window.opener.${generatorFnName}();
+          }
+        };
+        document.getElementById('copyBtn').onclick = function(){
+          const ta = document.getElementById('popupText');
+          ta.select();
+          document.execCommand('copy');
+          alert('コピーしました');
+        };
+      <\/script>
+    </body></html>
+  `);
+  w.document.close();
+}
+function openMemoPopup(){ openEditablePopup('メモ帳（通常ログ内容）', 'buildNormalLogText'); }
+function openCtePopup(){ openEditablePopup('CTEテンプレ出力', 'buildCteText', '1.1em'); }
+function openSeCallPopup(){ openEditablePopup('SEコールテンプレ', 'buildSeCallText', '1.1em'); }
+function openTransferPopup(){ openEditablePopup('転送テンプレ', 'buildTransferText', '1.1em'); }
+
+function escapeHtml(str){
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+/* ================= Enterキーで次の入力欄へ移動（全セクション対象・textareaのみ除外） ================= */
+function setupEnterKeyNavigationGlobal(){
+  const focusableSelector = 'input[type="text"], input[type="email"], input[type="date"], select';
+
+  function getFocusableElements(){
+    return Array.from(document.querySelectorAll(focusableSelector))
+      .filter(el => el.offsetParent !== null && !el.disabled);
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Enter') return;
+
+    const target = e.target;
+    const tagName = target.tagName.toLowerCase();
+
+    if(tagName === 'textarea') return;
+    if(tagName !== 'input' && tagName !== 'select') return;
+
+    e.preventDefault();
+
+    const focusableList = getFocusableElements();
+    const currentIndex = focusableList.indexOf(target);
+
+    if(currentIndex > -1 && currentIndex < focusableList.length - 1){
+      const nextElement = focusableList[currentIndex + 1];
+      nextElement.focus();
+      if(nextElement.select){
+        try { nextElement.select(); } catch(err) {}
+      }
+    }
+  });
+}
+setupEnterKeyNavigationGlobal();
+</script>
+
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
